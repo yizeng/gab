@@ -5,10 +5,12 @@ run:
 	@air
 
 test:
-	@go test ./... -v -race
+	@set -euo pipefail
+	@go test ./... -json -v -race 2>&1 | tee /tmp/gotest.log | gotestfmt
 
 coverage:
-	@go test ./... -v -race -coverpkg=./... -coverprofile=coverage.out -covermode=atomic
+	@set -euo pipefail
+	@go test ./... -json -v -race -coverpkg=./... -coverprofile=coverage.out -covermode=atomic 2>&1 | tee /tmp/gotest.log | gotestfmt
 	@go tool cover -html coverage.out -o coverage.html
 	@open coverage.html
 

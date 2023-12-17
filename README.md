@@ -30,9 +30,11 @@ For example, `minimum` folder contains a minimalistic Go service with 1 example 
 Some common development tools are introduced for better development experience.
 
 - [cosmtrek/air](https://github.com/cosmtrek/air) - Live reload for Go apps
+- [GoTestTools/gotestfmt](https://github.com/GoTestTools/gotestfmt) - go test output for humans
 
 ```
 go install github.com/cosmtrek/air@latest
+go install github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@latest
 ```
 
 ## `chi/minimum`
