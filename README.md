@@ -24,6 +24,17 @@ For example, `minimum` folder contains a minimalistic Go service with 1 example 
     ...
 ...
 ```
+
+### Development Tools
+
+Some common development tools are introduced for better development experience.
+
+- [cosmtrek/air](https://github.com/cosmtrek/air) - Live reload for Go apps
+
+```
+go install github.com/cosmtrek/air@latest
+```
+
 ## `chi/minimum`
 
 ### API
