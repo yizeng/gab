@@ -48,9 +48,30 @@ go install github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@latest
 ### Testing
 - [stretchr/testify][stretchr/testify] - A toolkit with common assertions and mocks that plays nicely with the standard library
 
+## `chi/crud-gorm`
+
+### API
+- [go-chi/chi][go-chi/chi] - lightweight, idiomatic and composable router for building Go HTTP services
+  - [go-chi/render][go-chi/render] - easily manage HTTP request / response payloads of Go HTTP services
+- [spf13/viper][spf13/viper] - Go configuration with fangs
+- [uber-go/zap][uber-go/zap] - Blazing fast, structured, leveled logging in Go.
+- [go-ozzo/ozzo-validation][go-ozzo/ozzo-validation] - An idiomatic Go (golang) validation package. Supports configurable and extensible validation rules (validators) using normal language constructs instead of error-prone struct tags.
+
+### Database
+- [PostgreSQL][PostgreSQL] - The World's Most Advanced Open Source Relational Database
+- [go-gorm/gorm][go-gorm/gorm] - The fantastic ORM library for Golang, aims to be developer friendly
+
+### Testing
+- [stretchr/testify][stretchr/testify] - A toolkit with common assertions and mocks that plays nicely with the standard library
+- [ory/dockertest][ory/dockertest] - Write better integration tests! Dockertest helps you boot up ephermal docker images for your Go tests with minimal work.
+
 [go-chi/chi]: https://github.com/go-chi/chi
 [gin-gonic/gin]: https://github.com/gin-gonic/gin
 [go-chi/render]: https://github.com/go-chi/render
 [spf13/viper]: https://github.com/spf13/viper
 [uber-go/zap]: https://github.com/uber-go/zap
 [stretchr/testify]: https://github.com/stretchr/testify
+[go-ozzo/ozzo-validation]: https://github.com/go-ozzo/ozzo-validation
+[PostgreSQL]: https://www.postgresql.org/
+[go-gorm/gorm]: https://github.com/go-gorm/gorm
+[ory/dockertest]: https://github.com/ory/dockertest
