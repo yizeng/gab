@@ -1,0 +1,21 @@
+version: "3.9"
+
+name: "gab"
+
+services:
+  api:
+    container_name: "chi-minimum-api"
+    image: yizeng/gab:chi-minimum
+    build:
+      args:
+        GO_VERSION: ${GO_VERSION}
+      dockerfile: Dockerfile
+      context: .
+      target: development
+    env_file: .env
+    environment: # Overwrite some ENVs for Docker environment.
+      - API_HOST=0.0.0.0
+    volumes:
+      - .:/project
+    ports:
+      - "${API_PORT}:${API_PORT}"
