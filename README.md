@@ -55,6 +55,7 @@ Alternatively, use `make install` to install the required Go tooling.
 
 ### API
 - [go-chi/chi][go-chi/chi] - lightweight, idiomatic and composable router for building Go HTTP services
+  - [go-chi/cors][go-chi/cors] - CORS net/http middleware for Go
   - [go-chi/render][go-chi/render] - easily manage HTTP request / response payloads of Go HTTP services
 - [spf13/viper][spf13/viper] - Go configuration with fangs
 - [uber-go/zap][uber-go/zap] - Blazing fast, structured, leveled logging in Go.
@@ -67,6 +68,7 @@ Alternatively, use `make install` to install the required Go tooling.
 
 ### API
 - [go-chi/chi][go-chi/chi] - lightweight, idiomatic and composable router for building Go HTTP services
+  - [go-chi/cors][go-chi/cors] - CORS net/http middleware for Go
   - [go-chi/render][go-chi/render] - easily manage HTTP request / response payloads of Go HTTP services
 - [spf13/viper][spf13/viper] - Go configuration with fangs
 - [uber-go/zap][uber-go/zap] - Blazing fast, structured, leveled logging in Go.
@@ -83,6 +85,7 @@ Alternatively, use `make install` to install the required Go tooling.
 
 [go-chi/chi]: https://github.com/go-chi/chi
 [gin-gonic/gin]: https://github.com/gin-gonic/gin
+[go-chi/cors]: https://github.com/go-chi/cors
 [go-chi/render]: https://github.com/go-chi/render
 [spf13/viper]: https://github.com/spf13/viper
 [uber-go/zap]: https://github.com/uber-go/zap
