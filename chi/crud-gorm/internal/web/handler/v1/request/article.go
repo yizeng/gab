@@ -4,8 +4,6 @@ import (
 	"net/http"
 
 	validation "github.com/go-ozzo/ozzo-validation"
-
-	"github.com/yizeng/gab/chi/crud-gorm/internal/domain"
 )
 
 const (
@@ -14,7 +12,10 @@ const (
 )
 
 type CreateArticleRequest struct {
-	domain.Article
+	UserID uint `json:"user_id" validate:"required"`
+
+	Title   string `json:"title" validate:"required"`
+	Content string `json:"content" validate:"required"`
 }
 
 func (req *CreateArticleRequest) Validate() error {

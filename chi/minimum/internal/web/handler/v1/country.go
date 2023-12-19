@@ -25,6 +25,15 @@ func NewCountryHandler(svc CountryService) *CountryHandler {
 	}
 }
 
+// HandleSumPopulationByState godoc
+// @Summary      Sum the total population by state
+// @Tags         countries
+// @Produce      json
+// @Param        request   body      request.SumPopulationByState true "request body"
+// @Success      200      {object}   []domain.State
+// @Failure      400      {object}   response.ErrResponse
+// @Failure      500      {object}   response.ErrResponse
+// @Router       /countries/sum-population-by-state [post]
 func (h *CountryHandler) HandleSumPopulationByState(w http.ResponseWriter, r *http.Request) {
 	req := request.SumPopulationByState{}
 	if err := render.Bind(r, &req); err != nil {

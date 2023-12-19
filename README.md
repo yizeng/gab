@@ -25,17 +25,27 @@ For example, `minimum` folder contains a minimalistic Go service with 1 example 
 ...
 ```
 
-### Development Tools
+### Development
 
-Some common development tools are introduced for better development experience.
+Each boilerplate can be booted up natively or by Docker Compose.
+
+Please refer to `Makefile` or `docker-compose.yml` for details.
+
+#### Tools
+
+Some common development tools are introduced for better local development experience.
 
 - [cosmtrek/air](https://github.com/cosmtrek/air) - Live reload for Go apps
 - [GoTestTools/gotestfmt](https://github.com/GoTestTools/gotestfmt) - go test output for humans
+- [swaggo/swag](https://github.com/swaggo/swag) - Automatically generate RESTful API documentation with Swagger 2.0 for Go.
 
 ```
 go install github.com/cosmtrek/air@latest
 go install github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@latest
+go install github.com/swaggo/swag/cmd/swag@latest
 ```
+
+Alternatively, use `make install` to install the required Go tooling.
 
 ### Third Party Tools
 
@@ -48,6 +58,7 @@ go install github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@latest
   - [go-chi/render][go-chi/render] - easily manage HTTP request / response payloads of Go HTTP services
 - [spf13/viper][spf13/viper] - Go configuration with fangs
 - [uber-go/zap][uber-go/zap] - Blazing fast, structured, leveled logging in Go.
+- [swaggo/http-swagger][swaggo/http-swagger] - Default net/http wrapper to automatically generate RESTful API documentation with Swagger 2.0.
 
 ### Testing
 - [stretchr/testify][stretchr/testify] - A toolkit with common assertions and mocks that plays nicely with the standard library
@@ -60,6 +71,7 @@ go install github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@latest
 - [spf13/viper][spf13/viper] - Go configuration with fangs
 - [uber-go/zap][uber-go/zap] - Blazing fast, structured, leveled logging in Go.
 - [go-ozzo/ozzo-validation][go-ozzo/ozzo-validation] - An idiomatic Go (golang) validation package. Supports configurable and extensible validation rules (validators) using normal language constructs instead of error-prone struct tags.
+- [swaggo/http-swagger][swaggo/http-swagger] - Default net/http wrapper to automatically generate RESTful API documentation with Swagger 2.0.
 
 ### Database
 - [PostgreSQL][PostgreSQL] - The World's Most Advanced Open Source Relational Database
@@ -79,3 +91,4 @@ go install github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@latest
 [PostgreSQL]: https://www.postgresql.org/
 [go-gorm/gorm]: https://github.com/go-gorm/gorm
 [ory/dockertest]: https://github.com/ory/dockertest
+[swaggo/http-swagger]: https://github.com/swaggo/http-swagger

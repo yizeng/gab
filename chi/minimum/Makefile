@@ -1,5 +1,11 @@
-all : run test coverage docker
+all : install run test coverage docker swag
 .PHONY : all
+
+install:
+	@go version
+	@go install github.com/cosmtrek/air@latest
+	@go install github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@latest
+	@go install github.com/swaggo/swag/cmd/swag@latest
 
 run:
 	@air
@@ -16,3 +22,6 @@ coverage:
 
 docker:
 	@docker compose up --build --force-recreate -V
+
+swag:
+	@swag init

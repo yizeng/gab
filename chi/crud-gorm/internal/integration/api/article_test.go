@@ -97,12 +97,9 @@ func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleCreateArticle() {
 			name: "201 Created",
 			buildReqBody: func() string {
 				article := request.CreateArticleRequest{
-					Article: domain.Article{
-						ID:      1,
-						UserID:  123,
-						Title:   "title 1",
-						Content: "content 1",
-					},
+					UserID:  123,
+					Title:   "title 1",
+					Content: "content 1",
 				}
 
 				body, err := json.Marshal(article)
@@ -123,11 +120,8 @@ func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleCreateArticle() {
 			name: "400 Bad Request - Missing user_id, Title too long, Content too long",
 			buildReqBody: func() string {
 				article := request.CreateArticleRequest{
-					Article: domain.Article{
-						ID:      1,
-						Title:   uniuri.NewLen(200),
-						Content: uniuri.NewLen(10000),
-					},
+					Title:   uniuri.NewLen(200),
+					Content: uniuri.NewLen(10000),
 				}
 
 				body, err := json.Marshal(article)
@@ -154,12 +148,9 @@ func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleCreateArticle() {
 			name: "400 Bad Request - Already exists",
 			buildReqBody: func() string {
 				article := request.CreateArticleRequest{
-					Article: domain.Article{
-						ID:      999,
-						UserID:  123,
-						Title:   "seeded title 999",
-						Content: "seeded content 999",
-					},
+					UserID:  123,
+					Title:   "seeded title 999",
+					Content: "seeded content 999",
 				}
 
 				body, err := json.Marshal(article)
