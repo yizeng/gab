@@ -1,13 +1,10 @@
-package integration
+package api
 
 import (
 	"net/http"
 	"net/http/httptest"
-	"testing"
 
 	"github.com/yizeng/gab/chi/crud-gorm/internal/web"
-
-	"github.com/stretchr/testify/assert"
 )
 
 // executeRequest, creates a new ResponseRecorder
@@ -19,12 +16,4 @@ func executeRequest(req *http.Request, s *web.Server) *httptest.ResponseRecorder
 	s.Router.ServeHTTP(rr, req)
 
 	return rr
-}
-
-// checkResponseCode is a simple utility to check the response code
-// of the response
-func checkResponseCode(t *testing.T, expected, actual int) {
-	if expected != actual {
-		assert.Equal(t, actual, expected)
-	}
 }

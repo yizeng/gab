@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/yizeng/go-api-boilerplates/chi/crud-gorm/internal/domain"
-	"github.com/yizeng/go-api-boilerplates/chi/crud-gorm/internal/repository/dao"
+	"github.com/yizeng/gab/chi/crud-gorm/internal/domain"
+	"github.com/yizeng/gab/chi/crud-gorm/internal/repository/dao"
 )
 
 var (
