@@ -1,6 +1,6 @@
 # Gab (Go API Boilerplates)
 
-Gab is a set of Go API Boilerplates (Gab) to spin up Go APIs quickly.
+Gab (Go API Boilerplates) is a set of boilerplates to spin up Go APIs quickly.
 
 ## How to Use?
 
@@ -36,6 +36,10 @@ Some common development tools are introduced for better development experience.
 go install github.com/cosmtrek/air@latest
 go install github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@latest
 ```
+
+### Third Party Tools
+
+- [CodeCov](https://app.codecov.io/) - Codecov is the all-in-one code coverage reporting solution for any test suite
 
 ## `chi/minimum`
 
