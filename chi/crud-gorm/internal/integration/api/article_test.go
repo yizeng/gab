@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dchest/uniuri"
 	"github.com/ory/dockertest/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -119,13 +120,13 @@ func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleCreateArticle() {
 			},
 		},
 		{
-			name: "400 Bad Request - Missing user_id",
+			name: "400 Bad Request - Missing user_id, Title too long, Content too long",
 			buildReqBody: func() string {
 				article := request.CreateArticleRequest{
 					Article: domain.Article{
 						ID:      1,
-						Title:   "title 1",
-						Content: "content 1",
+						Title:   uniuri.NewLen(200),
+						Content: uniuri.NewLen(10000),
 					},
 				}
 
@@ -136,7 +137,7 @@ func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleCreateArticle() {
 			},
 			respCode: http.StatusBadRequest,
 			wantErr:  true,
-			err:      response.NewBadRequest("article.user_id cannot be empty"),
+			err:      response.NewBadRequest("content: the length must be between 1 and 5000; title: the length must be between 1 and 128; user_id: cannot be blank."),
 			want:     nil,
 		},
 		{
