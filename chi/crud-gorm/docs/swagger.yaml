@@ -1,0 +1,119 @@
+definitions:
+  domain.Article:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  request.CreateArticleRequest:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - content
+    - title
+    - user_id
+    type: object
+  response.ErrResponse:
+    properties:
+      error:
+        description: user-facing error message
+        type: string
+      error_code:
+        description: application-specific error code
+        type: integer
+      status:
+        description: http response status code
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /articles:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Article'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrResponse'
+      summary: List all articles
+      tags:
+      - articles
+    post:
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateArticleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Article'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrResponse'
+      summary: Create an article
+      tags:
+      - articles
+  /articles/{articleID}:
+    get:
+      parameters:
+      - description: article ID
+        in: path
+        name: articleID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Article'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrResponse'
+      summary: Get an article
+      tags:
+      - articles
+swagger: "2.0"

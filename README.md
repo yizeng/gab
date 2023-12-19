@@ -71,6 +71,7 @@ Alternatively, use `make install` to install the required Go tooling.
 - [spf13/viper][spf13/viper] - Go configuration with fangs
 - [uber-go/zap][uber-go/zap] - Blazing fast, structured, leveled logging in Go.
 - [go-ozzo/ozzo-validation][go-ozzo/ozzo-validation] - An idiomatic Go (golang) validation package. Supports configurable and extensible validation rules (validators) using normal language constructs instead of error-prone struct tags.
+- [swaggo/http-swagger][swaggo/http-swagger] - Default net/http wrapper to automatically generate RESTful API documentation with Swagger 2.0.
 
 ### Database
 - [PostgreSQL][PostgreSQL] - The World's Most Advanced Open Source Relational Database

@@ -9,9 +9,11 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/spf13/viper"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
+	"github.com/yizeng/gab/chi/crud-gorm/docs"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/repository"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/repository/dao"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/service"
@@ -64,6 +66,8 @@ func (s *Server) MountMiddlewares() {
 }
 
 func (s *Server) MountHandlers(articleHandler *v1.ArticleHandler) {
+	const basePath = "/api/v1"
+
 	apiV1Router := chi.NewRouter()
 	apiV1Router.Route("/", func(r chi.Router) {
 		r.Get("/articles", articleHandler.HandleListArticles)
@@ -71,7 +75,15 @@ func (s *Server) MountHandlers(articleHandler *v1.ArticleHandler) {
 		r.Get("/articles/{articleID}", articleHandler.HandleGetArticle)
 	})
 
-	s.Router.Mount("/api/v1", apiV1Router)
+	s.Router.Mount(basePath, apiV1Router)
+
+	// Setup Swagger UI.
+	docs.SwaggerInfo.Host = s.Address
+	docs.SwaggerInfo.BasePath = basePath
+	docs.SwaggerInfo.Title = "API for chi/crud-gorm"
+	docs.SwaggerInfo.Description = "This is an example of Go API with Chi router."
+	docs.SwaggerInfo.Version = "1.0"
+	s.Router.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	s.printAllRoutes()
 }
