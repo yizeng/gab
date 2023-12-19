@@ -7,7 +7,7 @@ import (
 )
 
 type SumPopulationByState struct {
-	States []domain.State
+	States []domain.State `json:"states" validate:"required"`
 }
 
 func (c *SumPopulationByState) Bind(r *http.Request) error {

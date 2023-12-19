@@ -1,6 +1,6 @@
 package domain
 
 type State struct {
-	Name       string
-	Population uint
+	Name       string `json:"name" validate:"required"`
+	Population uint   `json:"population" validate:"required"`
 }

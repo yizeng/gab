@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/yizeng/gab/chi/minimum/docs"
 	"github.com/yizeng/gab/chi/minimum/internal/service"
 	v1 "github.com/yizeng/gab/chi/minimum/internal/web/handler/v1"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/spf13/viper"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 )
 
@@ -50,6 +52,8 @@ func (s *Server) MountMiddlewares() {
 }
 
 func (s *Server) MountHandlers() {
+	const basePath = "/api/v1"
+
 	apiV1Router := chi.NewRouter()
 	apiV1Router.Route("/", func(r chi.Router) {
 		countrySvc := service.NewCountryService()
@@ -57,7 +61,15 @@ func (s *Server) MountHandlers() {
 		r.Post("/countries/sum-population-by-state", countryHandler.HandleSumPopulationByState)
 	})
 
-	s.Router.Mount("/api/v1", apiV1Router)
+	s.Router.Mount(basePath, apiV1Router)
+
+	// Setup Swagger UI.
+	docs.SwaggerInfo.Host = s.Address
+	docs.SwaggerInfo.BasePath = basePath
+	docs.SwaggerInfo.Title = "API for chi/minimum"
+	docs.SwaggerInfo.Description = "This is an example of Go API with Chi router."
+	docs.SwaggerInfo.Version = "1.0"
+	s.Router.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	s.printAllRoutes()
 }
