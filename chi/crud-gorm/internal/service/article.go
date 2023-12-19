@@ -5,38 +5,53 @@ import (
 	"fmt"
 
 	"github.com/yizeng/gab/chi/crud-gorm/internal/domain"
+	"github.com/yizeng/gab/chi/crud-gorm/internal/repository"
 )
 
-type ArticleService struct{}
+var (
+	ErrArticleDuplicated = repository.ErrArticleDuplicated
+	ErrArticleNotFound   = repository.ErrArticleNotFound
+)
 
-func NewArticleService() *ArticleService {
-	return &ArticleService{}
+type ArticleRepository interface {
+	Create(ctx context.Context, article *domain.Article) (*domain.Article, error)
+	FindByID(ctx context.Context, id uint) (*domain.Article, error)
+	FindAll(ctx context.Context) ([]domain.Article, error)
 }
 
-func (a *ArticleService) ListArticles(ctx context.Context) ([]domain.Article, error) {
-	dummyArticles := []domain.Article{
-		{
-			ID:      1,
-			Title:   "title 1",
-			Content: "content 1",
-		}, {
-			ID:      2,
-			Title:   "title 2",
-			Content: "content 2",
-		},
+type ArticleService struct {
+	repo ArticleRepository
+}
+
+func NewArticleService(repo ArticleRepository) *ArticleService {
+	return &ArticleService{
+		repo: repo,
+	}
+}
+
+func (s *ArticleService) CreateArticle(ctx context.Context, article *domain.Article) (*domain.Article, error) {
+	created, err := s.repo.Create(ctx, article)
+	if err != nil {
+		return nil, fmt.Errorf("s.repo.Create -> %w", err)
 	}
 
-	return dummyArticles, nil
+	return created, nil
 }
 
-func (a *ArticleService) CreateArticle(ctx context.Context, article domain.Article) (domain.Article, error) {
+func (s *ArticleService) GetArticle(ctx context.Context, id uint) (*domain.Article, error) {
+	article, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("s.repo.FindByID -> %w", err)
+	}
+
 	return article, nil
 }
 
-func (a *ArticleService) GetArticle(ctx context.Context, id uint) (domain.Article, error) {
-	return domain.Article{
-		ID:      id,
-		Title:   fmt.Sprintf("title %v", id),
-		Content: fmt.Sprintf("content %v", id),
-	}, nil
+func (s *ArticleService) ListArticles(ctx context.Context) ([]domain.Article, error) {
+	articles, err := s.repo.FindAll(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("s.repo.FindAll -> %w", err)
+	}
+
+	return articles, nil
 }

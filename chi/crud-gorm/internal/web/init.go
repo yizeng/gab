@@ -12,6 +12,8 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
+	"github.com/yizeng/gab/chi/crud-gorm/internal/repository"
+	"github.com/yizeng/gab/chi/crud-gorm/internal/repository/dao"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/service"
 	v1 "github.com/yizeng/gab/chi/crud-gorm/internal/web/handler/v1"
 )
@@ -36,7 +38,9 @@ func NewServer(db *gorm.DB) *Server {
 }
 
 func initArticleHandler(db *gorm.DB) *v1.ArticleHandler {
-	articleSvc := service.NewArticleService()
+	articleDAO := dao.NewArticleDAO(db)
+	articleRepo := repository.NewArticleRepository(articleDAO)
+	articleSvc := service.NewArticleService(articleRepo)
 	articleHandler := v1.NewArticleHandler(articleSvc)
 
 	return articleHandler

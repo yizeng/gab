@@ -38,5 +38,5 @@ func BuildDSNFromENV() string {
 }
 
 func initTables(db *gorm.DB) error {
-	return db.AutoMigrate()
+	return db.AutoMigrate(&Article{})
 }
