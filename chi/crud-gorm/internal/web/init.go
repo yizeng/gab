@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 
 	"github.com/yizeng/gab/chi/crud-gorm/internal/service"
 	v1 "github.com/yizeng/gab/chi/crud-gorm/internal/web/handler/v1"
@@ -20,8 +21,8 @@ type Server struct {
 	Router  *chi.Mux
 }
 
-func NewServer() *Server {
-	articleHandler := initArticleHandler()
+func NewServer(db *gorm.DB) *Server {
+	articleHandler := initArticleHandler(db)
 
 	s := &Server{
 		Address: getServerAddress(),
@@ -34,7 +35,7 @@ func NewServer() *Server {
 	return s
 }
 
-func initArticleHandler() *v1.ArticleHandler {
+func initArticleHandler(db *gorm.DB) *v1.ArticleHandler {
 	articleSvc := service.NewArticleService()
 	articleHandler := v1.NewArticleHandler(articleSvc)
 
