@@ -1,4 +1,4 @@
-package web
+package api
 
 import (
 	"fmt"
@@ -13,9 +13,9 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/yizeng/gab/chi/minimum/docs"
+	v1 "github.com/yizeng/gab/chi/minimum/internal/api/handler/v1"
 	"github.com/yizeng/gab/chi/minimum/internal/config"
 	"github.com/yizeng/gab/chi/minimum/internal/service"
-	v1 "github.com/yizeng/gab/chi/minimum/internal/web/handler/v1"
 )
 
 type Server struct {

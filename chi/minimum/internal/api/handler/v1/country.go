@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/yizeng/gab/chi/minimum/internal/api/handler/v1/request"
+	"github.com/yizeng/gab/chi/minimum/internal/api/handler/v1/response"
 	"github.com/yizeng/gab/chi/minimum/internal/domain"
-	"github.com/yizeng/gab/chi/minimum/internal/web/handler/v1/request"
-	"github.com/yizeng/gab/chi/minimum/internal/web/handler/v1/response"
 
 	"github.com/go-chi/render"
 )
