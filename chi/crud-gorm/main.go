@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/yizeng/gab/chi/crud-gorm/internal/config"
+	"github.com/yizeng/gab/chi/crud-gorm/internal/db"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/logger"
-	"github.com/yizeng/gab/chi/crud-gorm/internal/repository/dao"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/web"
 
 	"go.uber.org/zap"
@@ -22,12 +22,12 @@ func main() {
 		panic(fmt.Sprintf("failed to initialize logger -> %v", err))
 	}
 
-	db, err := dao.OpenPostgres(conf.Postgres)
+	postgresDB, err := db.OpenPostgres(conf.Postgres)
 	if err != nil {
 		panic(fmt.Sprintf("failed to initialize database -> %v", err))
 	}
 
-	s := web.NewServer(conf.API, db)
+	s := web.NewServer(conf.API, postgresDB)
 
 	zap.L().Info("starting server at...", zap.String("address", s.Address))
 
