@@ -9,23 +9,27 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/render"
-	"github.com/spf13/viper"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 
 	"github.com/yizeng/gab/chi/minimum/docs"
+	"github.com/yizeng/gab/chi/minimum/internal/config"
 	"github.com/yizeng/gab/chi/minimum/internal/service"
 	v1 "github.com/yizeng/gab/chi/minimum/internal/web/handler/v1"
 )
 
 type Server struct {
 	Address string
+	Config  *config.APIConfig
 	Router  *chi.Mux
 }
 
-func NewServer() *Server {
+func NewServer(conf *config.APIConfig) *Server {
+	address := fmt.Sprintf("%v:%v", conf.Host, conf.Port)
+
 	s := &Server{
-		Address: getServerAddress(),
+		Address: address,
+		Config:  conf,
 		Router:  chi.NewRouter(),
 	}
 
@@ -33,14 +37,6 @@ func NewServer() *Server {
 	s.MountHandlers()
 
 	return s
-}
-
-func getServerAddress() string {
-	host := viper.Get("API_HOST")
-	port := viper.Get("API_PORT")
-	addr := fmt.Sprintf("%v:%v", host, port)
-
-	return addr
 }
 
 func (s *Server) MountMiddlewares() {
@@ -54,14 +50,14 @@ func (s *Server) MountMiddlewares() {
 				return true
 			}
 
-			return strings.HasPrefix(origin, viper.GetString("API_HOST"))
+			return strings.HasPrefix(origin, s.Config.Host)
 		},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
-		Debug:            strings.EqualFold(viper.GetString("API_ENV"), "development"),
+		Debug:            strings.EqualFold(s.Config.Environment, "development"),
 	}))
 	s.Router.Use(middleware.Heartbeat("/"))
 	s.Router.Use(render.SetContentType(render.ContentTypeJSON))

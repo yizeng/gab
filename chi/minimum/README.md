@@ -45,7 +45,7 @@ Then navigate to <http://localhost:3333/swagger/index.html> to view the API docu
 - [go-chi/chi][go-chi/chi] - lightweight, idiomatic and composable router for building Go HTTP services
   - [go-chi/cors][go-chi/cors] - CORS net/http middleware for Go
   - [go-chi/render][go-chi/render] - easily manage HTTP request / response payloads of Go HTTP services
-- [spf13/viper][spf13/viper] - Go configuration with fangs
+- [sethvargo/go-envconfig][sethvargo/go-envconfig] - A Go library for parsing struct tags from environment variables.
 - [uber-go/zap][uber-go/zap] - Blazing fast, structured, leveled logging in Go.
 - [swaggo/http-swagger][swaggo/http-swagger] - Default net/http wrapper to automatically generate RESTful API documentation with Swagger 2.0.
 
@@ -56,7 +56,7 @@ Then navigate to <http://localhost:3333/swagger/index.html> to view the API docu
 [gin-gonic/gin]: https://github.com/gin-gonic/gin
 [go-chi/cors]: https://github.com/go-chi/cors
 [go-chi/render]: https://github.com/go-chi/render
-[spf13/viper]: https://github.com/spf13/viper
+[sethvargo/go-envconfig]: https://github.com/sethvargo/go-envconfig
 [uber-go/zap]: https://github.com/uber-go/zap
 [stretchr/testify]: https://github.com/stretchr/testify
 [swaggo/swag]: https://github.com/swaggo/swag

@@ -4,17 +4,15 @@ import (
 	"strings"
 
 	"go.uber.org/zap"
-
-	"github.com/spf13/viper"
 )
 
-func Init() error {
+func Init(environment string) error {
 	logger, err := zap.NewProduction()
 	if err != nil {
 		return err
 	}
 
-	if strings.EqualFold(viper.GetString("API_ENV"), "development") {
+	if strings.EqualFold(environment, "development") {
 		logger, err = zap.NewDevelopment()
 
 		if err != nil {

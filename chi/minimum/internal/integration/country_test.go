@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/yizeng/gab/chi/minimum/internal/config"
 	"github.com/yizeng/gab/chi/minimum/internal/domain"
 	"github.com/yizeng/gab/chi/minimum/internal/web"
 	"github.com/yizeng/gab/chi/minimum/internal/web/handler/v1/request"
@@ -16,7 +17,7 @@ import (
 )
 
 func TestHandleCalculateTotalPopulation(t *testing.T) {
-	s := web.NewServer()
+	s := web.NewServer(&config.APIConfig{})
 
 	// Create a New Request.
 	expectedTotalPopulation := 68085736
@@ -49,7 +50,7 @@ func TestHandleCalculateTotalPopulation(t *testing.T) {
 }
 
 func TestHandleCalculateTotalPopulation_BadRequest(t *testing.T) {
-	s := web.NewServer()
+	s := web.NewServer(&config.APIConfig{})
 
 	// Create a New Request.
 	body := strings.NewReader(`[`)
