@@ -13,27 +13,25 @@ import (
 )
 
 func main() {
-	err := config.Init()
+	conf, err := config.Load("./config.yml")
 	if err != nil {
 		panic(fmt.Sprintf("failed to initialize config -> %v", err))
 	}
 
-	err = logger.Init()
-	if err != nil {
+	if err = logger.Init(conf.API.Environment); err != nil {
 		panic(fmt.Sprintf("failed to initialize logger -> %v", err))
 	}
 
-	dsn := dao.BuildDSNFromENV()
-	db, err := dao.InitDB(dsn)
+	db, err := dao.OpenPostgres(conf.Postgres)
 	if err != nil {
 		panic(fmt.Sprintf("failed to initialize database -> %v", err))
 	}
 
-	s := web.NewServer(db)
+	s := web.NewServer(conf.API, db)
 
 	zap.L().Info("starting server at...", zap.String("address", s.Address))
-	err = http.ListenAndServe(s.Address, s.Router)
-	if err != nil {
+
+	if err = http.ListenAndServe(s.Address, s.Router); err != nil {
 		panic(fmt.Sprintf("failed to start the server -> %v", err))
 	}
 }

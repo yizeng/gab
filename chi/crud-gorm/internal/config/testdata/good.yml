@@ -1,0 +1,13 @@
+# viper doesn't support loading only ENVs with config file.
+# Hence we create a placeholder YAML for it.
+# See https://github.com/spf13/viper/issues/584 for more details.
+api:
+  env:
+  host:
+  port:
+postgres:
+  host:
+  port:
+  user:
+  password:
+  db:

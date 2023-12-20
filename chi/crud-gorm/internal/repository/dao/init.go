@@ -6,35 +6,25 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/spf13/viper"
+	"github.com/yizeng/gab/chi/crud-gorm/internal/config"
 )
 
-func InitDB(dsn string) (*gorm.DB, error) {
+func OpenPostgres(conf *config.PostgresConfig) (*gorm.DB, error) {
+	dsn := fmt.Sprintf(
+		"host=%v port=%v user=%v password=%v dbname=%v sslmode=disable",
+		conf.Host, conf.Port, conf.User, conf.Password, conf.DB,
+	)
+
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("gorm.Open -> %w", err)
 	}
 
-	err = initTables(db)
-	if err != nil {
+	if err = initTables(db); err != nil {
 		return nil, fmt.Errorf("dao.InitTables -> %w", err)
 	}
+
 	return db, nil
-}
-
-func BuildDSNFromENV() string {
-	host := viper.GetString("POSTGRES_HOST")
-	user := viper.GetString("POSTGRES_USER")
-	password := viper.GetString("POSTGRES_PASSWORD")
-	dbName := viper.GetString("POSTGRES_DB_NAME")
-	port := viper.GetInt("POSTGRES_PORT")
-
-	dsn := fmt.Sprintf(
-		"host=%v user=%v password=%v dbname=%v port=%v sslmode=disable",
-		host, user, password, dbName, port,
-	)
-
-	return dsn
 }
 
 func initTables(db *gorm.DB) error {

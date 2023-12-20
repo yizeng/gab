@@ -9,12 +9,12 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/render"
-	"github.com/spf13/viper"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
 	"github.com/yizeng/gab/chi/crud-gorm/docs"
+	"github.com/yizeng/gab/chi/crud-gorm/internal/config"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/repository"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/repository/dao"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/service"
@@ -23,14 +23,17 @@ import (
 
 type Server struct {
 	Address string
+	Config  *config.APIConfig
 	Router  *chi.Mux
 }
 
-func NewServer(db *gorm.DB) *Server {
+func NewServer(conf *config.APIConfig, db *gorm.DB) *Server {
+	address := fmt.Sprintf("%v:%v", conf.Host, conf.Port)
 	articleHandler := initArticleHandler(db)
 
 	s := &Server{
-		Address: getServerAddress(),
+		Address: address,
+		Config:  conf,
 		Router:  chi.NewRouter(),
 	}
 
@@ -49,14 +52,6 @@ func initArticleHandler(db *gorm.DB) *v1.ArticleHandler {
 	return articleHandler
 }
 
-func getServerAddress() string {
-	host := viper.Get("API_HOST")
-	port := viper.Get("API_PORT")
-	addr := fmt.Sprintf("%v:%v", host, port)
-
-	return addr
-}
-
 func (s *Server) MountMiddlewares() {
 	s.Router.Use(middleware.RequestID)
 	s.Router.Use(middleware.Logger)
@@ -68,14 +63,14 @@ func (s *Server) MountMiddlewares() {
 				return true
 			}
 
-			return strings.HasPrefix(origin, viper.GetString("API_HOST"))
+			return strings.HasPrefix(origin, s.Config.Host)
 		},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
-		Debug:            strings.EqualFold(viper.GetString("API_ENV"), "development"),
+		Debug:            strings.EqualFold(s.Config.Environment, "development"),
 	}))
 	s.Router.Use(middleware.Heartbeat("/"))
 	s.Router.Use(render.SetContentType(render.ContentTypeJSON))

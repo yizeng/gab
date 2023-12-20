@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
 
+	"github.com/yizeng/gab/chi/crud-gorm/internal/config"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/domain"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/integration/dockertester"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/repository/dao"
@@ -65,7 +66,7 @@ func (s *ArticleHandlersTestSuite) SetupTest() {
 	require.NoError(s.T(), err)
 
 	// Create web server.
-	s.server = web.NewServer(s.db)
+	s.server = web.NewServer(&config.APIConfig{}, s.db)
 }
 
 func (s *ArticleHandlersTestSuite) TearDownTest() {
