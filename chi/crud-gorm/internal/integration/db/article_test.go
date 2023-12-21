@@ -12,9 +12,9 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/yizeng/gab/chi/crud-gorm/internal/domain"
-	"github.com/yizeng/gab/chi/crud-gorm/internal/integration/dockertester"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/repository"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/repository/dao"
+	"github.com/yizeng/gab/chi/crud-gorm/pkg/dockertester"
 )
 
 var (
@@ -48,7 +48,7 @@ func (s *ArticleDBTestSuite) TearDownSuite() {
 
 func (s *ArticleDBTestSuite) SetupTest() {
 	// Run migrations.
-	err := s.db.AutoMigrate(&dao.Article{})
+	err := dao.InitTables(s.db)
 	require.NoError(s.T(), err)
 
 	// Seed database.

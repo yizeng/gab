@@ -10,10 +10,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 
+	"github.com/yizeng/gab/chi/crud-gorm/internal/api/handler/v1/request"
+	"github.com/yizeng/gab/chi/crud-gorm/internal/api/handler/v1/response"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/domain"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/service"
-	"github.com/yizeng/gab/chi/crud-gorm/internal/web/handler/v1/request"
-	"github.com/yizeng/gab/chi/crud-gorm/internal/web/handler/v1/response"
 )
 
 type ArticleService interface {

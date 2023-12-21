@@ -14,10 +14,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/yizeng/gab/chi/crud-gorm/internal/api/handler/v1/request"
+	"github.com/yizeng/gab/chi/crud-gorm/internal/api/handler/v1/response"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/domain"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/service"
-	"github.com/yizeng/gab/chi/crud-gorm/internal/web/handler/v1/request"
-	"github.com/yizeng/gab/chi/crud-gorm/internal/web/handler/v1/response"
 )
 
 func TestArticleHandler_HandleCreateArticle(t *testing.T) {

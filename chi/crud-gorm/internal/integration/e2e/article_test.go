@@ -1,4 +1,4 @@
-package api
+package e2e
 
 import (
 	"encoding/json"
@@ -15,13 +15,13 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
 
+	"github.com/yizeng/gab/chi/crud-gorm/internal/api"
+	"github.com/yizeng/gab/chi/crud-gorm/internal/api/handler/v1/request"
+	"github.com/yizeng/gab/chi/crud-gorm/internal/api/handler/v1/response"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/config"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/domain"
-	"github.com/yizeng/gab/chi/crud-gorm/internal/integration/dockertester"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/repository/dao"
-	"github.com/yizeng/gab/chi/crud-gorm/internal/web"
-	"github.com/yizeng/gab/chi/crud-gorm/internal/web/handler/v1/request"
-	"github.com/yizeng/gab/chi/crud-gorm/internal/web/handler/v1/response"
+	"github.com/yizeng/gab/chi/crud-gorm/pkg/dockertester"
 )
 
 var (
@@ -34,7 +34,7 @@ type ArticleHandlersTestSuite struct {
 	suite.Suite
 
 	db     *gorm.DB
-	server *web.Server
+	server *api.Server
 }
 
 func (s *ArticleHandlersTestSuite) SetupSuite() {
@@ -55,7 +55,7 @@ func (s *ArticleHandlersTestSuite) TearDownSuite() {
 
 func (s *ArticleHandlersTestSuite) SetupTest() {
 	// Run migrations.
-	err := s.db.AutoMigrate(&dao.Article{})
+	err := dao.InitTables(s.db)
 	require.NoError(s.T(), err)
 
 	// Seed database.
@@ -65,8 +65,8 @@ func (s *ArticleHandlersTestSuite) SetupTest() {
 	err = s.db.Exec(string(script)).Error
 	require.NoError(s.T(), err)
 
-	// Create web server.
-	s.server = web.NewServer(&config.APIConfig{}, s.db)
+	// Create API server.
+	s.server = api.NewServer(&config.APIConfig{}, s.db)
 }
 
 func (s *ArticleHandlersTestSuite) TearDownTest() {

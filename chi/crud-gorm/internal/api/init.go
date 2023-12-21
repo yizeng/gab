@@ -1,4 +1,4 @@
-package web
+package api
 
 import (
 	"fmt"
@@ -14,11 +14,11 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/yizeng/gab/chi/crud-gorm/docs"
+	v1 "github.com/yizeng/gab/chi/crud-gorm/internal/api/handler/v1"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/config"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/repository"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/repository/dao"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/service"
-	v1 "github.com/yizeng/gab/chi/crud-gorm/internal/web/handler/v1"
 )
 
 type Server struct {
