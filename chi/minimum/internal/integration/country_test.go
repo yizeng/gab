@@ -17,52 +17,72 @@ import (
 )
 
 func TestHandleCalculateTotalPopulation(t *testing.T) {
+	const expectedTotalPopulation = 68085736
+
 	s := api.NewServer(&config.APIConfig{})
 
-	// Create a New Request.
-	expectedTotalPopulation := 68085736
-	states := request.SumPopulationByState{
-		States: []domain.State{
-			{
-				Name:       "California",
-				Population: 38940231,
+	tests := []struct {
+		name         string
+		buildReqBody func() string
+		wantCode     int
+		wantBody     string
+		wantErr      bool
+	}{
+		{
+			name: "Happy Path",
+			buildReqBody: func() string {
+				states := request.SumPopulationByState{
+					States: []domain.State{
+						{
+							Name:       "California",
+							Population: 38940231,
+						},
+						{
+							Name:       "Texas",
+							Population: 29145505,
+						},
+					},
+				}
+
+				body, err := json.Marshal(states)
+				require.NoError(t, err)
+
+				return string(body)
 			},
-			{
-				Name:       "Texas",
-				Population: 29145505,
+			wantCode: http.StatusOK,
+			wantBody: fmt.Sprintf("{\"total_population\":%v}\n", expectedTotalPopulation),
+		},
+		{
+			name: "400 Bad Request - Invalid JSON",
+			buildReqBody: func() string {
+				return "["
 			},
+			wantCode: http.StatusBadRequest,
+			wantBody: fmt.Sprintf("{\"status\":400,\"error\":\"unexpected EOF\"}\n"),
+		},
+		{
+			name: "400 Bad Request - Missing required values",
+			buildReqBody: func() string {
+				return `{"states": [{"population": 123}]}`
+			},
+			wantCode: http.StatusBadRequest,
+			wantBody: fmt.Sprintf("{\"status\":400,\"error\":\"states: (name: cannot be blank.).\"}\n"),
 		},
 	}
 
-	body, err := json.Marshal(states)
-	require.NoError(t, err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create a New Request.
+			body := tt.buildReqBody()
+			req, err := http.NewRequest("POST", "/api/v1/countries/sum-population-by-state", strings.NewReader(body))
+			require.NoError(t, err)
 
-	req, err := http.NewRequest("POST", "/api/v1/countries/sum-population-by-state", strings.NewReader(string(body)))
-	require.NoError(t, err)
+			// Execute Request.
+			response := executeRequest(req, s)
 
-	// Execute Request.
-	response := executeRequest(req, s)
-
-	// Check the response code.
-	assert.Equal(t, http.StatusOK, response.Code)
-
-	assert.Equal(t, fmt.Sprintf("{\"total_population\":%v}\n", expectedTotalPopulation), response.Body.String())
-}
-
-func TestHandleCalculateTotalPopulation_BadRequest(t *testing.T) {
-	s := api.NewServer(&config.APIConfig{})
-
-	// Create a New Request.
-	body := strings.NewReader(`[`)
-	req, err := http.NewRequest("POST", "/api/v1/countries/sum-population-by-state", body)
-	require.NoError(t, err)
-
-	// Execute Request.
-	response := executeRequest(req, s)
-
-	// Check the response code.
-	assert.Equal(t, http.StatusBadRequest, response.Code)
-
-	msg := `{"status":400,"error":"unexpected EOF"}`
-	assert.Equal(t, fmt.Sprintf("%v\n", msg), response.Body.String())
+			// Check the response code and body.
+			assert.Equal(t, tt.wantCode, response.Code)
+			assert.Equal(t, tt.wantBody, response.Body.String())
+		})
+	}
 }

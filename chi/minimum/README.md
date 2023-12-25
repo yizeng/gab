@@ -48,6 +48,7 @@ Then navigate to <http://localhost:3333/swagger/index.html> to view the API docu
 - [joho/godotenv][joho/godotenv] - A Go port of Ruby's dotenv library (Loads environment variables from .env files)
 - [sethvargo/go-envconfig][sethvargo/go-envconfig] - A Go library for parsing struct tags from environment variables.
 - [uber-go/zap][uber-go/zap] - Blazing fast, structured, leveled logging in Go.
+- [go-ozzo/ozzo-validation][go-ozzo/ozzo-validation] - An idiomatic Go (golang) validation package. Supports configurable and extensible validation rules (validators) using normal language constructs instead of error-prone struct tags.
 - [swaggo/http-swagger][swaggo/http-swagger] - Default net/http wrapper to automatically generate RESTful API documentation with Swagger 2.0.
 
 ### Testing
@@ -60,5 +61,6 @@ Then navigate to <http://localhost:3333/swagger/index.html> to view the API docu
 [sethvargo/go-envconfig]: https://github.com/sethvargo/go-envconfig
 [uber-go/zap]: https://github.com/uber-go/zap
 [stretchr/testify]: https://github.com/stretchr/testify
+[go-ozzo/ozzo-validation]: https://github.com/go-ozzo/ozzo-validation
 [swaggo/swag]: https://github.com/swaggo/swag
 [swaggo/http-swagger]: https://github.com/swaggo/http-swagger
