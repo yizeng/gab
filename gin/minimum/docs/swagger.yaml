@@ -1,0 +1,61 @@
+definitions:
+  domain.State:
+    properties:
+      name:
+        type: string
+      population:
+        type: integer
+    required:
+    - name
+    - population
+    type: object
+  request.SumPopulationByState:
+    properties:
+      states:
+        items:
+          $ref: '#/definitions/domain.State'
+        type: array
+    required:
+    - states
+    type: object
+  response.ErrResponse:
+    properties:
+      error:
+        description: user-facing error message
+        type: string
+      error_code:
+        description: application-specific error code
+        type: integer
+      status:
+        description: http response status code
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /countries/sum-population-by-state:
+    post:
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.SumPopulationByState'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.State'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrResponse'
+      summary: Sum the total population by state
+      tags:
+      - countries
+swagger: "2.0"
