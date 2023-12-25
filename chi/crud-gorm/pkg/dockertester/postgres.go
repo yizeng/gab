@@ -20,12 +20,18 @@ const (
 	postgresPassword = "postgres"
 	postgresPort     = "5432"
 	postgresImage    = "postgres"
-	postgresImageTag = "16"
+	postgresImageTag = "16.1-alpine"
 )
 
-// InitDockertestForPostgres function initialize dockertest for PostgreSQL.
+type Dockertester struct {
+	HostPort string
+	Pool     *dockertest.Pool
+	Resource *dockertest.Resource
+}
+
+// InitPostgres function initialize dockertest for PostgreSQL.
 // Please refer to the official example here: https://github.com/ory/dockertest/blob/v3/examples/PostgreSQL.md
-func InitDockertestForPostgres() (string, *dockertest.Pool, *dockertest.Resource) {
+func InitPostgres() *Dockertester {
 	// create a random port number between min and max to avoid conflicts.
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	hostPort := fmt.Sprint(r.Intn(maxPort-minPort) + minPort)
@@ -87,7 +93,11 @@ func InitDockertestForPostgres() (string, *dockertest.Pool, *dockertest.Resource
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
 
-	return hostPort, pool, resource
+	return &Dockertester{
+		HostPort: hostPort,
+		Pool:     pool,
+		Resource: resource,
+	}
 }
 
 func OpenPostgres(resource *dockertest.Resource, port string) (*gorm.DB, error) {

@@ -17,32 +17,31 @@ import (
 	"github.com/yizeng/gab/chi/crud-gorm/pkg/dockertester"
 )
 
-var (
-	hostPort string
-	pool     *dockertest.Pool
-	resource *dockertest.Resource
-	repo     *repository.ArticleRepository
-)
-
 type ArticleDBTestSuite struct {
 	suite.Suite
 
-	db *gorm.DB
+	db       *gorm.DB
+	pool     *dockertest.Pool
+	resource *dockertest.Resource
+
+	repo *repository.ArticleRepository
 }
 
 func (s *ArticleDBTestSuite) SetupSuite() {
 	// Initialize container.
-	hostPort, pool, resource = dockertester.InitDockertestForPostgres()
+	dt := dockertester.InitPostgres()
+	s.pool = dt.Pool
+	s.resource = dt.Resource
 
 	// Open connection.
-	db, err := dockertester.OpenPostgres(resource, hostPort)
+	db, err := dockertester.OpenPostgres(dt.Resource, dt.HostPort)
 	require.NoError(s.T(), err)
 
 	s.db = db
 }
 
 func (s *ArticleDBTestSuite) TearDownSuite() {
-	err := pool.Purge(resource) // Destroy the container.
+	err := s.pool.Purge(s.resource) // Destroy the container.
 	require.NoError(s.T(), err)
 }
 
@@ -60,7 +59,7 @@ func (s *ArticleDBTestSuite) SetupTest() {
 
 	// Initialize repository.
 	daoArticle := dao.NewArticleDAO(s.db)
-	repo = repository.NewArticleRepository(daoArticle)
+	s.repo = repository.NewArticleRepository(daoArticle)
 }
 
 func (s *ArticleDBTestSuite) TearDownTest() {
@@ -80,7 +79,7 @@ func TestArticleDB(t *testing.T) {
 }
 
 func (s *ArticleDBTestSuite) TestArticleDB_FindByID() {
-	result, err := repo.FindByID(context.TODO(), 999)
+	result, err := s.repo.FindByID(context.TODO(), 999)
 	assert.NoError(s.T(), err)
 
 	assert.NotNil(s.T(), result)
@@ -90,7 +89,7 @@ func (s *ArticleDBTestSuite) TestArticleDB_FindByID() {
 }
 
 func (s *ArticleDBTestSuite) TestArticleDB_FindAll() {
-	result, err := repo.FindAll(context.TODO())
+	result, err := s.repo.FindAll(context.TODO())
 	assert.NoError(s.T(), err)
 
 	assert.Equal(s.T(), len(result), 2)
@@ -100,7 +99,7 @@ func (s *ArticleDBTestSuite) TestArticleDB_FindAll() {
 }
 
 func (s *ArticleDBTestSuite) TestArticleDB_Create() {
-	result, err := repo.Create(context.TODO(), &domain.Article{
+	result, err := s.repo.Create(context.TODO(), &domain.Article{
 		UserID:  123,
 		Title:   "new title",
 		Content: "new content",

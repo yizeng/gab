@@ -24,32 +24,30 @@ import (
 	"github.com/yizeng/gab/chi/crud-gorm/pkg/dockertester"
 )
 
-var (
-	hostPort string
-	pool     *dockertest.Pool
-	resource *dockertest.Resource
-)
-
 type ArticleHandlersTestSuite struct {
 	suite.Suite
 
-	db     *gorm.DB
-	server *api.Server
+	db       *gorm.DB
+	pool     *dockertest.Pool
+	resource *dockertest.Resource
+	server   *api.Server
 }
 
 func (s *ArticleHandlersTestSuite) SetupSuite() {
 	// Initialize container.
-	hostPort, pool, resource = dockertester.InitDockertestForPostgres()
+	dt := dockertester.InitPostgres()
+	s.pool = dt.Pool
+	s.resource = dt.Resource
 
 	// Open connection.
-	db, err := dockertester.OpenPostgres(resource, hostPort)
+	db, err := dockertester.OpenPostgres(dt.Resource, dt.HostPort)
 	require.NoError(s.T(), err)
 
 	s.db = db
 }
 
 func (s *ArticleHandlersTestSuite) TearDownSuite() {
-	err := pool.Purge(resource) // Destroy the container.
+	err := s.pool.Purge(s.resource) // Destroy the container.
 	require.NoError(s.T(), err)
 }
 
