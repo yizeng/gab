@@ -6,6 +6,7 @@ require (
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-chi/cors v1.2.1
 	github.com/go-chi/render v1.0.3
+	github.com/joho/godotenv v1.5.1
 	github.com/sethvargo/go-envconfig v0.9.0
 	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/http-swagger v1.3.4

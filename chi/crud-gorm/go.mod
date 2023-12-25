@@ -11,6 +11,7 @@ require (
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
 	github.com/jackc/pgx/v5 v5.4.3
+	github.com/joho/godotenv v1.5.1
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/spf13/viper v1.17.0
 	github.com/stretchr/testify v1.8.4

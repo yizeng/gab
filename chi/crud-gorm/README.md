@@ -46,6 +46,7 @@ Then navigate to <http://localhost:3333/swagger/index.html> to view the API docu
 - [go-chi/chi][go-chi/chi] - lightweight, idiomatic and composable router for building Go HTTP services
   - [go-chi/cors][go-chi/cors] - CORS net/http middleware for Go
   - [go-chi/render][go-chi/render] - easily manage HTTP request / response payloads of Go HTTP services
+- [joho/godotenv][joho/godotenv] - A Go port of Ruby's dotenv library (Loads environment variables from .env files)
 - [spf13/viper][spf13/viper] - Go configuration with fangs
 - [uber-go/zap][uber-go/zap] - Blazing fast, structured, leveled logging in Go.
 - [go-ozzo/ozzo-validation][go-ozzo/ozzo-validation] - An idiomatic Go (golang) validation package. Supports configurable and extensible validation rules (validators) using normal language constructs instead of error-prone struct tags.
@@ -60,9 +61,9 @@ Then navigate to <http://localhost:3333/swagger/index.html> to view the API docu
 - [ory/dockertest][ory/dockertest] - Write better integration tests! Dockertest helps you boot up ephermal docker images for your Go tests with minimal work.
 
 [go-chi/chi]: https://github.com/go-chi/chi
-[gin-gonic/gin]: https://github.com/gin-gonic/gin
 [go-chi/cors]: https://github.com/go-chi/cors
 [go-chi/render]: https://github.com/go-chi/render
+[joho/godotenv]: https://github.com/joho/godotenv
 [spf13/viper]: https://github.com/spf13/viper
 [uber-go/zap]: https://github.com/uber-go/zap
 [stretchr/testify]: https://github.com/stretchr/testify

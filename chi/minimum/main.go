@@ -1,6 +1,10 @@
 package main
 
-import "github.com/yizeng/gab/chi/minimum/cmd/app"
+import (
+	_ "github.com/joho/godotenv/autoload" // Autoload .env file.
+
+	"github.com/yizeng/gab/chi/minimum/cmd/app"
+)
 
 func main() {
 	app.Start()

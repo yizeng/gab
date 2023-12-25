@@ -45,6 +45,7 @@ Then navigate to <http://localhost:3333/swagger/index.html> to view the API docu
 - [go-chi/chi][go-chi/chi] - lightweight, idiomatic and composable router for building Go HTTP services
   - [go-chi/cors][go-chi/cors] - CORS net/http middleware for Go
   - [go-chi/render][go-chi/render] - easily manage HTTP request / response payloads of Go HTTP services
+- [joho/godotenv][joho/godotenv] - A Go port of Ruby's dotenv library (Loads environment variables from .env files)
 - [sethvargo/go-envconfig][sethvargo/go-envconfig] - A Go library for parsing struct tags from environment variables.
 - [uber-go/zap][uber-go/zap] - Blazing fast, structured, leveled logging in Go.
 - [swaggo/http-swagger][swaggo/http-swagger] - Default net/http wrapper to automatically generate RESTful API documentation with Swagger 2.0.
@@ -53,9 +54,9 @@ Then navigate to <http://localhost:3333/swagger/index.html> to view the API docu
 - [stretchr/testify][stretchr/testify] - A toolkit with common assertions and mocks that plays nicely with the standard library
 
 [go-chi/chi]: https://github.com/go-chi/chi
-[gin-gonic/gin]: https://github.com/gin-gonic/gin
 [go-chi/cors]: https://github.com/go-chi/cors
 [go-chi/render]: https://github.com/go-chi/render
+[joho/godotenv]: https://github.com/joho/godotenv
 [sethvargo/go-envconfig]: https://github.com/sethvargo/go-envconfig
 [uber-go/zap]: https://github.com/uber-go/zap
 [stretchr/testify]: https://github.com/stretchr/testify
