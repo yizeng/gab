@@ -5,6 +5,8 @@ api:
   env:
   host:
   port:
+gin:
+  mode:
 postgres:
   host:
   port:

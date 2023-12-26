@@ -7,8 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
+	"github.com/gin-gonic/gin"
 
 	"github.com/yizeng/gab/gin/crud-gorm/internal/api/handler/v1/request"
 	"github.com/yizeng/gab/gin/crud-gorm/internal/api/handler/v1/response"
@@ -41,39 +40,39 @@ func NewArticleHandler(svc ArticleService) *ArticleHandler {
 // @Failure      400      {object}   response.ErrResponse
 // @Failure      500      {object}   response.ErrResponse
 // @Router       /articles [post]
-func (h *ArticleHandler) HandleCreateArticle(w http.ResponseWriter, r *http.Request) {
+func (h *ArticleHandler) HandleCreateArticle(ctx *gin.Context) {
 	req := request.CreateArticleRequest{}
-	if err := render.Bind(r, &req); err != nil {
-		render.Render(w, r, response.NewBadRequest(err.Error()))
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.RenderError(ctx, response.NewBadRequest(err.Error()))
 
 		return
 	}
 
-	article, err := h.svc.CreateArticle(r.Context(), &domain.Article{
+	if err := req.Validate(); err != nil {
+		response.RenderError(ctx, response.NewBadRequest(err.Error()))
+
+		return
+	}
+
+	article, err := h.svc.CreateArticle(ctx.Request.Context(), &domain.Article{
 		UserID:  req.UserID,
 		Title:   req.Title,
 		Content: req.Content,
 	})
 	if err != nil {
 		if errors.Is(err, service.ErrArticleDuplicated) {
-			render.Render(w, r, response.NewBadRequest(service.ErrArticleDuplicated.Error()))
+			response.RenderError(ctx, response.NewBadRequest(service.ErrArticleDuplicated.Error()))
 
 			return
 		}
 
 		err = fmt.Errorf("v1.HandleCreateArticle -> h.svc.CreateArticle -> %w", err)
-		render.Render(w, r, response.NewInternalServerError(err))
+		response.RenderError(ctx, response.NewInternalServerError(err))
 
 		return
 	}
 
-	render.Status(r, http.StatusCreated)
-	err = render.Render(w, r, response.NewArticle(article))
-	if err != nil {
-		render.Render(w, r, response.NewInternalServerError(err))
-
-		return
-	}
+	ctx.JSON(http.StatusCreated, article)
 }
 
 // HandleGetArticle godoc
@@ -86,41 +85,36 @@ func (h *ArticleHandler) HandleCreateArticle(w http.ResponseWriter, r *http.Requ
 // @Failure      404      {object}   response.ErrResponse
 // @Failure      500      {object}   response.ErrResponse
 // @Router       /articles/{articleID} [get]
-func (h *ArticleHandler) HandleGetArticle(w http.ResponseWriter, r *http.Request) {
-	rawArticleID := chi.URLParam(r, "articleID")
+func (h *ArticleHandler) HandleGetArticle(ctx *gin.Context) {
+	rawArticleID := ctx.Param("articleID")
 	articleID, err := strconv.Atoi(rawArticleID)
 	if err != nil {
-		render.Render(w, r, response.NewInvalidInput("articleID", rawArticleID))
+		response.RenderError(ctx, response.NewInvalidInput("articleID", rawArticleID))
 
 		return
 	}
 
 	if articleID <= 0 {
-		render.Render(w, r, response.NewNotFound("article", "ID", articleID))
+		response.RenderError(ctx, response.NewNotFound("article", "ID", articleID))
 
 		return
 	}
 
-	article, err := h.svc.GetArticle(r.Context(), uint(articleID))
+	article, err := h.svc.GetArticle(ctx.Request.Context(), uint(articleID))
 	if err != nil {
 		if errors.Is(err, service.ErrArticleNotFound) {
-			render.Render(w, r, response.NewNotFound("article", "ID", articleID))
+			response.RenderError(ctx, response.NewNotFound("article", "ID", articleID))
 
 			return
 		}
 
 		err = fmt.Errorf("v1.HandleGetArticle -> h.svc.GetArticle -> %w", err)
-		render.Render(w, r, response.NewInternalServerError(err))
+		response.RenderError(ctx, response.NewInternalServerError(err))
 
 		return
 	}
 
-	err = render.Render(w, r, response.NewArticle(article))
-	if err != nil {
-		render.Render(w, r, response.NewInternalServerError(err))
-
-		return
-	}
+	ctx.JSON(http.StatusOK, article)
 }
 
 // HandleListArticles godoc
@@ -130,19 +124,14 @@ func (h *ArticleHandler) HandleGetArticle(w http.ResponseWriter, r *http.Request
 // @Success      200      {object}   []domain.Article
 // @Failure      500      {object}   response.ErrResponse
 // @Router       /articles [get]
-func (h *ArticleHandler) HandleListArticles(w http.ResponseWriter, r *http.Request) {
-	articles, err := h.svc.ListArticles(r.Context())
+func (h *ArticleHandler) HandleListArticles(ctx *gin.Context) {
+	articles, err := h.svc.ListArticles(ctx.Request.Context())
 	if err != nil {
 		err = fmt.Errorf("v1.HandleListArticles -> h.svc.ListArticles -> %w", err)
-		render.Render(w, r, response.NewInternalServerError(err))
+		response.RenderError(ctx, response.NewInternalServerError(err))
 
 		return
 	}
 
-	err = render.RenderList(w, r, response.NewArticles(articles))
-	if err != nil {
-		render.Render(w, r, response.NewInternalServerError(err))
-
-		return
-	}
+	ctx.JSON(http.StatusOK, articles)
 }

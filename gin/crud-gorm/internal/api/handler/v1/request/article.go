@@ -1,8 +1,6 @@
 package request
 
 import (
-	"net/http"
-
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 
@@ -25,13 +23,4 @@ func (req *CreateArticleRequest) Validate() error {
 		validation.Field(&req.Title, validation.Required, validation.Length(1, maxTitleLength)),
 		validation.Field(&req.Content, validation.Required, validation.Length(1, maxContentLength)),
 	)
-}
-
-func (req *CreateArticleRequest) Bind(r *http.Request) error {
-	err := req.Validate()
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

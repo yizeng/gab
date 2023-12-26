@@ -3,9 +3,6 @@ package response
 import (
 	"fmt"
 	"net/http"
-
-	"github.com/go-chi/render"
-	"go.uber.org/zap"
 )
 
 type ErrResponse struct {
@@ -15,16 +12,6 @@ type ErrResponse struct {
 	ErrorMsg  string `json:"error"`                // user-facing error message
 
 	StackErr error `json:"-"` // stack error for logging
-}
-
-func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
-	if e.StackErr != nil {
-		zap.L().Error(e.StackErr.Error())
-	}
-
-	render.Status(r, e.StatusCode)
-
-	return nil
 }
 
 func NewBadRequest(msg string) *ErrResponse {

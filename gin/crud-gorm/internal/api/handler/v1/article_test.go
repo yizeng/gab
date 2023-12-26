@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -98,8 +98,9 @@ func TestArticleHandler_HandleCreateArticle(t *testing.T) {
 			h := NewArticleHandler(svc)
 
 			// Create router and attach handler.
-			r := chi.NewRouter()
-			r.Post("/", h.HandleCreateArticle)
+			gin.SetMode(gin.TestMode)
+			r := gin.Default()
+			r.POST("/", h.HandleCreateArticle)
 
 			// Prepare request.
 			body := tt.buildReqBody()
@@ -191,8 +192,9 @@ func TestArticleHandler_HandleGetArticle(t *testing.T) {
 			h := NewArticleHandler(svc)
 
 			// Create router and attach handler.
-			r := chi.NewRouter()
-			r.Get("/{articleID}", h.HandleGetArticle)
+			gin.SetMode(gin.TestMode)
+			r := gin.Default()
+			r.GET("/:articleID", h.HandleGetArticle)
 
 			// Prepare request.
 			url := fmt.Sprintf("/%v", tt.articleID)
@@ -287,8 +289,9 @@ func TestArticleHandler_HandleListArticles(t *testing.T) {
 			h := NewArticleHandler(svc)
 
 			// Create router and attach handler.
-			r := chi.NewRouter()
-			r.Get("/", h.HandleListArticles)
+			gin.SetMode(gin.TestMode)
+			r := gin.Default()
+			r.GET("/", h.HandleListArticles)
 
 			// Prepare request.
 			req, err := http.NewRequest(http.MethodGet, "/", nil)

@@ -70,7 +70,7 @@ func TestLoad(t *testing.T) {
 			setupENV:   func() {},
 			want:       nil,
 			wantErr:    true,
-			wantErrMsg: "conf.validateConfig -> c.validate() -> API: cannot be blank; Postgres: cannot be blank.",
+			wantErrMsg: "conf.validateConfig -> c.validate() -> API: cannot be blank; Gin: cannot be blank; Postgres: cannot be blank.",
 		},
 		{
 			name: "Invalid YAML file",
@@ -120,7 +120,7 @@ func TestLoad(t *testing.T) {
 			},
 			want:       nil,
 			wantErr:    true,
-			wantErrMsg: `conf.validateConfig -> c.Gin.validate() -> Mode: cannot be blank.`,
+			wantErrMsg: `conf.validateConfig -> c.validate() -> Gin: cannot be blank.`,
 		},
 		{
 			name: "Invalid Postgres configs - missing DB",

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/dchest/uniuri"
+	"github.com/gin-gonic/gin"
 	"github.com/ory/dockertest/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -64,7 +65,13 @@ func (s *ArticleHandlersTestSuite) SetupTest() {
 	require.NoError(s.T(), err)
 
 	// Create API server.
-	s.server = api.NewServer(&config.APIConfig{}, s.db)
+	s.server = api.NewServer(&config.AppConfig{
+		API: &config.APIConfig{},
+		Gin: &config.GinConfig{
+			Mode: gin.TestMode,
+		},
+		Postgres: &config.PostgresConfig{},
+	}, s.db)
 }
 
 func (s *ArticleHandlersTestSuite) TearDownTest() {
