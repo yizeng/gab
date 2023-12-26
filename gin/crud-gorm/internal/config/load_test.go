@@ -123,6 +123,21 @@ func TestLoad(t *testing.T) {
 			wantErrMsg: `conf.validateConfig -> c.validate() -> Gin: cannot be blank.`,
 		},
 		{
+			name: "Invalid Gin configs - invalid value",
+			args: args{
+				configFile: "testdata/good.yml",
+			},
+			setupENV: func() {
+				setMandatoryENVs(t)
+
+				err := os.Setenv("GIN_MODE", "unknown")
+				require.NoError(t, err)
+			},
+			want:       nil,
+			wantErr:    true,
+			wantErrMsg: `conf.validateConfig -> c.Gin.validate() -> Mode: must be a valid value.`,
+		},
+		{
 			name: "Invalid Postgres configs - missing DB",
 			args: args{
 				configFile: "testdata/good.yml",
@@ -141,6 +156,7 @@ func TestLoad(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setupENV()
+			defer os.Clearenv()
 
 			got, err := Load(tt.args.configFile)
 			if (err != nil) != tt.wantErr {

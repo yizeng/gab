@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 
@@ -61,9 +62,15 @@ type GinConfig struct {
 }
 
 func (c *GinConfig) validate() error {
+	allowed := []any{
+		gin.TestMode,
+		gin.DebugMode,
+		gin.ReleaseMode,
+	}
+
 	return validation.ValidateStruct(
 		c,
-		validation.Field(&c.Mode, validation.Required),
+		validation.Field(&c.Mode, validation.Required, validation.In(allowed...)),
 	)
 }
 
