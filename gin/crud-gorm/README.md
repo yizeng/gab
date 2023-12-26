@@ -1,9 +1,31 @@
-# Go API Boilerplates - gin/crud-gorm
+<h1 align="center">
+  Go API Boilerplates - gin/crud-gorm
+</h1>
+
+<div align="center">
+
+[![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
+![Tests](https://github.com/yizeng/gab/actions/workflows/test.yml/badge.svg?branch=main)
+[![Go Report Card](https://goreportcard.com/badge/github.com/yizeng/gab/gin/crud-gorm)](https://goreportcard.com/report/github.com/yizeng/gab/gin/crud-gorm)
+
+</div>
+
+<hr />
 
 This is a basic example of Go API
 with [gin-gonic/gin][gin-gonic/gin], PostgreSQL and [GORM][go-gorm/gorm].
 
 A full list of libraries used can be found in [Dependencies](#dependencies) section.
+
+## Table of Contents
+
+- [Development](#development)
+  + [Tools](#tools)
+  + [Documentation](#documentation)
+- [Dependencies](#dependencies)
+  + [API](#api)
+  + [Database](#database)
+  + [Testing](#testing)
 
 ## Development
 
