@@ -21,7 +21,7 @@ func NewArticle(article *domain.Article) *ArticleResponse {
 }
 
 func NewArticles(articles []domain.Article) []render.Renderer {
-	var list []render.Renderer
+	list := make([]render.Renderer, 0, len(articles))
 	for _, a := range articles {
 		article := a
 		list = append(list, NewArticle(&article))
