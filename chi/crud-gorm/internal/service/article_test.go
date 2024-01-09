@@ -253,3 +253,84 @@ func TestArticleService_ListArticles(t *testing.T) {
 		})
 	}
 }
+
+func TestArticleService_SearchArticles(t *testing.T) {
+	testArticles := []domain.Article{
+		{
+			UserID:  999,
+			Title:   "title 999",
+			Content: "content 999",
+		},
+	}
+	testErr := errors.New("something happened")
+
+	type fields struct {
+		repo ArticleRepository
+	}
+	type args struct {
+		ctx      context.Context
+		articles []domain.Article
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		args       args
+		want       []domain.Article
+		wantErr    bool
+		wantErrMsg string
+	}{
+		{
+			name: "Happy Path",
+			fields: fields{
+				repo: &repository.ArticleRepositoryMock{
+					MockSearch: func(ctx context.Context, title, content string) ([]domain.Article, error) {
+						return testArticles, nil
+					},
+				},
+			},
+			args: args{
+				ctx:      context.TODO(),
+				articles: testArticles,
+			},
+			want:       testArticles,
+			wantErr:    false,
+			wantErrMsg: "",
+		},
+		{
+			name: "Error Path",
+			fields: fields{
+				repo: &repository.ArticleRepositoryMock{
+					MockSearch: func(ctx context.Context, title, content string) ([]domain.Article, error) {
+						return nil, testErr
+					},
+				},
+			},
+			args: args{
+				ctx:      context.TODO(),
+				articles: testArticles,
+			},
+			want:       nil,
+			wantErr:    true,
+			wantErrMsg: "s.repo.Search -> something happened",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &ArticleService{
+				repo: tt.fields.repo,
+			}
+			got, err := s.SearchArticles(tt.args.ctx, "999", "")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("SearchArticles() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if err != nil && tt.wantErr && err.Error() != tt.wantErrMsg {
+				t.Errorf("SearchArticles() errorMsg = %v, wantErrMsg %v", err.Error(), tt.wantErrMsg)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("SearchArticles() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

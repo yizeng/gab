@@ -84,6 +84,7 @@ func (s *Server) MountHandlers(articleHandler *v1.ArticleHandler) {
 		r.Get("/articles", articleHandler.HandleListArticles)
 		r.Post("/articles", articleHandler.HandleCreateArticle)
 		r.Get("/articles/{articleID}", articleHandler.HandleGetArticle)
+		r.Get("/articles/search", articleHandler.HandleSearchArticles)
 	})
 
 	s.Router.Mount(basePath, apiV1Router)
