@@ -20,6 +20,7 @@ type ArticleService interface {
 	CreateArticle(ctx context.Context, article *domain.Article) (*domain.Article, error)
 	GetArticle(ctx context.Context, id uint) (*domain.Article, error)
 	ListArticles(ctx context.Context) ([]domain.Article, error)
+	FilterArticles(ctx context.Context, title, content string) ([]domain.Article, error)
 }
 
 type ArticleHandler struct {
@@ -134,6 +135,35 @@ func (h *ArticleHandler) HandleListArticles(w http.ResponseWriter, r *http.Reque
 	articles, err := h.svc.ListArticles(r.Context())
 	if err != nil {
 		err = fmt.Errorf("v1.HandleListArticles -> h.svc.ListArticles -> %w", err)
+		render.Render(w, r, response.NewInternalServerError(err))
+
+		return
+	}
+
+	err = render.RenderList(w, r, response.NewArticles(articles))
+	if err != nil {
+		render.Render(w, r, response.NewInternalServerError(err))
+
+		return
+	}
+}
+
+// HandleFilterArticles godoc
+// @Summary      Filter articles
+// @Tags         articles
+// @Produce      json
+// @Param        title    query     string  false  "filter by title"
+// @Param        content  query     string  false  "filter by content"
+// @Success      200      {object}   []domain.Article
+// @Failure      500      {object}   response.ErrResponse
+// @Router       /articles/filter [get]
+func (h *ArticleHandler) HandleFilterArticles(w http.ResponseWriter, r *http.Request) {
+	titleParam := r.URL.Query().Get("title")
+	contentParam := r.URL.Query().Get("content")
+
+	articles, err := h.svc.FilterArticles(r.Context(), titleParam, contentParam)
+	if err != nil {
+		err = fmt.Errorf("v1.HandleFilterArticles -> h.svc.FilterArticles -> %w", err)
 		render.Render(w, r, response.NewInternalServerError(err))
 
 		return

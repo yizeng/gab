@@ -116,4 +116,31 @@ paths:
       summary: Get an article
       tags:
       - articles
+  /articles/filter:
+    get:
+      parameters:
+      - description: filter by title
+        in: query
+        name: title
+        type: string
+      - description: filter by content
+        in: query
+        name: content
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Article'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrResponse'
+      summary: Filter articles
+      tags:
+      - articles
 swagger: "2.0"

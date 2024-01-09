@@ -17,6 +17,7 @@ type ArticleDAO interface {
 	Create(ctx context.Context, article *dao.Article) (*dao.Article, error)
 	FindByID(ctx context.Context, id uint) (*dao.Article, error)
 	FindAll(ctx context.Context) ([]dao.Article, error)
+	Filter(ctx context.Context, title, content string) ([]dao.Article, error)
 }
 
 type ArticleRepository struct {
@@ -57,6 +58,20 @@ func (r *ArticleRepository) FindAll(ctx context.Context) ([]domain.Article, erro
 	allArticles, err := r.dao.FindAll(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("r.dao.FindAll -> %w", err)
+	}
+
+	articles := make([]domain.Article, 0, len(allArticles))
+	for _, a := range allArticles {
+		articles = append(articles, *daoToDomain(&a))
+	}
+
+	return articles, nil
+}
+
+func (r *ArticleRepository) Filter(ctx context.Context, title, content string) ([]domain.Article, error) {
+	allArticles, err := r.dao.Filter(ctx, title, content)
+	if err != nil {
+		return nil, fmt.Errorf("r.dao.Filter -> %w", err)
 	}
 
 	articles := make([]domain.Article, 0, len(allArticles))
