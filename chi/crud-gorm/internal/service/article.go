@@ -48,7 +48,7 @@ func (s *ArticleService) GetArticle(ctx context.Context, id uint) (*domain.Artic
 	return article, nil
 }
 
-func (s *ArticleService) ListArticles(ctx context.Context) ([]domain.Article, error) {
+func (s *ArticleService) ListArticles(ctx context.Context, page, perPage uint) ([]domain.Article, error) {
 	articles, err := s.repo.FindAll(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("s.repo.FindAll -> %w", err)

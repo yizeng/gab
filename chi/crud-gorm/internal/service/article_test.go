@@ -238,7 +238,7 @@ func TestArticleService_ListArticles(t *testing.T) {
 			s := &ArticleService{
 				repo: tt.fields.repo,
 			}
-			got, err := s.ListArticles(tt.args.ctx)
+			got, err := s.ListArticles(tt.args.ctx, 0, 0)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ListArticles() error = %v, wantErr %v", err, tt.wantErr)
 				return
