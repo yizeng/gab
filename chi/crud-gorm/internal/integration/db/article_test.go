@@ -89,7 +89,7 @@ func (s *ArticleDBTestSuite) TestArticleDB_FindByID() {
 }
 
 func (s *ArticleDBTestSuite) TestArticleDB_FindAll() {
-	result, err := s.repo.FindAll(context.TODO())
+	result, err := s.repo.FindAll(context.TODO(), 1, 100)
 	assert.NoError(s.T(), err)
 
 	assert.Equal(s.T(), len(result), 2)
