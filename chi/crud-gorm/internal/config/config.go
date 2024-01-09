@@ -56,6 +56,7 @@ type PostgresConfig struct {
 	User     string `mapstructure:"USER"`
 	Password string `mapstructure:"PASSWORD"`
 	DB       string `mapstructure:"DB"`
+	LogLevel string `mapstructure:"LOG_LEVEL"`
 }
 
 func (c *PostgresConfig) validate() error {
