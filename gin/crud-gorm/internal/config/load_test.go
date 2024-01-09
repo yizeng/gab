@@ -20,6 +20,7 @@ const (
 	postgresUsername = "root"
 	postgresPassword = "pass123"
 	postgresDB       = "testDB"
+	postgresLogLevel = "error"
 )
 
 func TestLoad(t *testing.T) {
@@ -40,7 +41,7 @@ func TestLoad(t *testing.T) {
 				configFile: "testdata/good.yml",
 			},
 			setupENV: func() {
-				setMandatoryENVs(t)
+				setENVs(t)
 			},
 			want: &AppConfig{
 				API: &APIConfig{
@@ -57,6 +58,7 @@ func TestLoad(t *testing.T) {
 					User:     postgresUsername,
 					Password: postgresPassword,
 					DB:       postgresDB,
+					LogLevel: postgresLogLevel,
 				},
 			},
 			wantErr:    false,
@@ -98,7 +100,7 @@ func TestLoad(t *testing.T) {
 				configFile: "testdata/good.yml",
 			},
 			setupENV: func() {
-				setMandatoryENVs(t)
+				setENVs(t)
 
 				err := os.Unsetenv("API_PORT")
 				require.NoError(t, err)
@@ -113,7 +115,7 @@ func TestLoad(t *testing.T) {
 				configFile: "testdata/good.yml",
 			},
 			setupENV: func() {
-				setMandatoryENVs(t)
+				setENVs(t)
 
 				err := os.Unsetenv("GIN_MODE")
 				require.NoError(t, err)
@@ -128,7 +130,7 @@ func TestLoad(t *testing.T) {
 				configFile: "testdata/good.yml",
 			},
 			setupENV: func() {
-				setMandatoryENVs(t)
+				setENVs(t)
 
 				err := os.Setenv("GIN_MODE", "unknown")
 				require.NoError(t, err)
@@ -143,7 +145,7 @@ func TestLoad(t *testing.T) {
 				configFile: "testdata/good.yml",
 			},
 			setupENV: func() {
-				setMandatoryENVs(t)
+				setENVs(t)
 
 				err := os.Unsetenv("POSTGRES_DB")
 				require.NoError(t, err)
@@ -176,17 +178,18 @@ func TestLoad(t *testing.T) {
 	}
 }
 
-func setMandatoryENVs(t *testing.T) {
+func setENVs(t *testing.T) {
 	m := map[string]string{
-		"API_ENV":           apiENV,
-		"API_HOST":          apiHost,
-		"API_PORT":          apiPort,
-		"GIN_MODE":          ginMode,
-		"POSTGRES_HOST":     postgresHost,
-		"POSTGRES_PORT":     postgresPort,
-		"POSTGRES_USER":     postgresUsername,
-		"POSTGRES_PASSWORD": postgresPassword,
-		"POSTGRES_DB":       postgresDB,
+		"API_ENV":            apiENV,
+		"API_HOST":           apiHost,
+		"API_PORT":           apiPort,
+		"GIN_MODE":           ginMode,
+		"POSTGRES_HOST":      postgresHost,
+		"POSTGRES_PORT":      postgresPort,
+		"POSTGRES_USER":      postgresUsername,
+		"POSTGRES_PASSWORD":  postgresPassword,
+		"POSTGRES_DB":        postgresDB,
+		"POSTGRES_LOG_LEVEL": postgresLogLevel,
 	}
 
 	for k, v := range m {

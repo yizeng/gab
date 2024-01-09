@@ -13,3 +13,4 @@ postgres:
   user:
   password:
   db:
+  log_level:
