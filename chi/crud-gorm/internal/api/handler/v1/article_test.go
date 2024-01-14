@@ -16,6 +16,7 @@ import (
 
 	"github.com/yizeng/gab/chi/crud-gorm/internal/api/handler/v1/request"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/api/handler/v1/response"
+	"github.com/yizeng/gab/chi/crud-gorm/internal/api/middleware"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/domain"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/service"
 )
@@ -255,7 +256,7 @@ func TestArticleHandler_HandleListArticles(t *testing.T) {
 			name: "200 OK",
 			setupService: func() ArticleService {
 				mock := service.NewArticleServiceMock()
-				mock.MockListArticles = func(ctx context.Context) ([]domain.Article, error) {
+				mock.MockListArticles = func(ctx context.Context, per, perPage uint) ([]domain.Article, error) {
 					return testArticles, nil
 				}
 				return mock
@@ -269,7 +270,7 @@ func TestArticleHandler_HandleListArticles(t *testing.T) {
 			name: "500 Internal Server Error - When service returns an error",
 			setupService: func() ArticleService {
 				mock := service.NewArticleServiceMock()
-				mock.MockListArticles = func(ctx context.Context) ([]domain.Article, error) {
+				mock.MockListArticles = func(ctx context.Context, per, perPage uint) ([]domain.Article, error) {
 					return nil, testError
 				}
 				return mock
@@ -288,7 +289,7 @@ func TestArticleHandler_HandleListArticles(t *testing.T) {
 
 			// Create router and attach handler.
 			r := chi.NewRouter()
-			r.Get("/", h.HandleListArticles)
+			r.With(middleware.Pagination).Get("/", h.HandleListArticles)
 
 			// Prepare request.
 			req, err := http.NewRequest(http.MethodGet, "/", nil)

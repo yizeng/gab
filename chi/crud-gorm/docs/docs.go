@@ -24,6 +24,20 @@ const docTemplate = `{
                     "articles"
                 ],
                 "summary": "List all articles",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "which page to load. Default to 1 if empty.",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "how many items per page. Default to 10 if empty.",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

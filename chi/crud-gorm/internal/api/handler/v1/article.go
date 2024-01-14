@@ -12,6 +12,7 @@ import (
 
 	"github.com/yizeng/gab/chi/crud-gorm/internal/api/handler/v1/request"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/api/handler/v1/response"
+	"github.com/yizeng/gab/chi/crud-gorm/internal/api/middleware"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/domain"
 	"github.com/yizeng/gab/chi/crud-gorm/internal/service"
 )
@@ -19,7 +20,7 @@ import (
 type ArticleService interface {
 	CreateArticle(ctx context.Context, article *domain.Article) (*domain.Article, error)
 	GetArticle(ctx context.Context, id uint) (*domain.Article, error)
-	ListArticles(ctx context.Context) ([]domain.Article, error)
+	ListArticles(ctx context.Context, page uint, perPage uint) ([]domain.Article, error)
 	SearchArticles(ctx context.Context, title, content string) ([]domain.Article, error)
 }
 
@@ -128,11 +129,16 @@ func (h *ArticleHandler) HandleGetArticle(w http.ResponseWriter, r *http.Request
 // @Summary      List all articles
 // @Tags         articles
 // @Produce      json
+// @Param        page     query      int  false  "which page to load. Default to 1 if empty."
+// @Param        per_page query      int  false  "how many items per page. Default to 10 if empty."
 // @Success      200      {object}   []domain.Article
 // @Failure      500      {object}   response.ErrResponse
 // @Router       /articles [get]
 func (h *ArticleHandler) HandleListArticles(w http.ResponseWriter, r *http.Request) {
-	articles, err := h.svc.ListArticles(r.Context())
+	page := r.Context().Value(middleware.PageQueryKey).(uint)
+	perPage := r.Context().Value(middleware.PerPageQueryKey).(uint)
+
+	articles, err := h.svc.ListArticles(r.Context(), page, perPage)
 	if err != nil {
 		err = fmt.Errorf("v1.HandleListArticles -> h.svc.ListArticles -> %w", err)
 		render.Render(w, r, response.NewInternalServerError(err))

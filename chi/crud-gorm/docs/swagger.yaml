@@ -44,6 +44,15 @@ info:
 paths:
   /articles:
     get:
+      parameters:
+      - description: which page to load. Default to 1 if empty.
+        in: query
+        name: page
+        type: integer
+      - description: how many items per page. Default to 10 if empty.
+        in: query
+        name: per_page
+        type: integer
       produces:
       - application/json
       responses:

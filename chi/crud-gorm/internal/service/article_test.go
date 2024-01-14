@@ -187,8 +187,9 @@ func TestArticleService_ListArticles(t *testing.T) {
 		repo ArticleRepository
 	}
 	type args struct {
-		ctx      context.Context
-		articles []domain.Article
+		ctx     context.Context
+		page    uint
+		perPage uint
 	}
 	tests := []struct {
 		name       string
@@ -202,14 +203,15 @@ func TestArticleService_ListArticles(t *testing.T) {
 			name: "Happy Path",
 			fields: fields{
 				repo: &repository.ArticleRepositoryMock{
-					MockFindAll: func(ctx context.Context) ([]domain.Article, error) {
+					MockFindAll: func(ctx context.Context, page, perPage uint) ([]domain.Article, error) {
 						return testArticles, nil
 					},
 				},
 			},
 			args: args{
-				ctx:      context.TODO(),
-				articles: testArticles,
+				ctx:     context.TODO(),
+				page:    1,
+				perPage: 1,
 			},
 			want:       testArticles,
 			wantErr:    false,
@@ -219,14 +221,15 @@ func TestArticleService_ListArticles(t *testing.T) {
 			name: "Error Path",
 			fields: fields{
 				repo: &repository.ArticleRepositoryMock{
-					MockFindAll: func(ctx context.Context) ([]domain.Article, error) {
+					MockFindAll: func(ctx context.Context, page, perPage uint) ([]domain.Article, error) {
 						return nil, testErr
 					},
 				},
 			},
 			args: args{
-				ctx:      context.TODO(),
-				articles: testArticles,
+				ctx:     context.TODO(),
+				page:    1,
+				perPage: 1,
 			},
 			want:       nil,
 			wantErr:    true,
@@ -238,7 +241,7 @@ func TestArticleService_ListArticles(t *testing.T) {
 			s := &ArticleService{
 				repo: tt.fields.repo,
 			}
-			got, err := s.ListArticles(tt.args.ctx)
+			got, err := s.ListArticles(tt.args.ctx, 0, 0)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ListArticles() error = %v, wantErr %v", err, tt.wantErr)
 				return
