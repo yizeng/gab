@@ -83,19 +83,19 @@ func (s *ArticleDBTestSuite) TestArticleDB_FindByID() {
 	assert.NoError(s.T(), err)
 
 	assert.NotNil(s.T(), result)
-	assert.EqualValues(s.T(), result.UserID, 123)
-	assert.Equal(s.T(), result.Title, "seeded title 999")
-	assert.Equal(s.T(), result.Content, "seeded content 999")
+	assert.EqualValues(s.T(), 123, result.UserID)
+	assert.Equal(s.T(), "seeded title 999", result.Title)
+	assert.Equal(s.T(), "seeded content 999", result.Content)
 }
 
 func (s *ArticleDBTestSuite) TestArticleDB_FindAll() {
 	result, err := s.repo.FindAll(context.TODO())
 	assert.NoError(s.T(), err)
 
-	assert.Equal(s.T(), len(result), 2)
-	assert.EqualValues(s.T(), result[0].UserID, 123)
-	assert.Equal(s.T(), result[0].Title, "seeded title 999")
-	assert.Equal(s.T(), result[0].Content, "seeded content 999")
+	assert.Equal(s.T(), 2, len(result))
+	assert.EqualValues(s.T(), 123, result[0].UserID)
+	assert.Equal(s.T(), "seeded title 999", result[0].Title)
+	assert.Equal(s.T(), "seeded content 999", result[0].Content)
 }
 
 func (s *ArticleDBTestSuite) TestArticleDB_Create() {
@@ -107,8 +107,8 @@ func (s *ArticleDBTestSuite) TestArticleDB_Create() {
 	assert.NoError(s.T(), err)
 
 	assert.NotNil(s.T(), result)
-	assert.Equal(s.T(), result.Title, "new title")
-	assert.Equal(s.T(), result.Content, "new content")
+	assert.Equal(s.T(), "new title", result.Title)
+	assert.Equal(s.T(), "new content", result.Content)
 }
 
 func (s *ArticleDBTestSuite) TestArticleDB_Search() {

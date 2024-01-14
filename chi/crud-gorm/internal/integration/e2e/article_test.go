@@ -240,7 +240,7 @@ func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleGetArticle() {
 			articleID: "abc",
 			respCode:  http.StatusBadRequest,
 			wantErr:   true,
-			err:       response.NewBadRequest("invalid input field articleID=abc"),
+			err:       response.NewInvalidInput("articleID", "abc"),
 			want:      nil,
 		},
 	}
