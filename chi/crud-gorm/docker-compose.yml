@@ -33,6 +33,7 @@ services:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     environment:
       - PGUSER=${POSTGRES_USER} # To avoid error: FATAL:  role "root" does not exist
+      - PGDATABASE=${POSTGRES_DB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - ./scripts/postgres/:/docker-entrypoint-initdb.d/
