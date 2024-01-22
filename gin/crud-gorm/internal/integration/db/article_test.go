@@ -110,3 +110,21 @@ func (s *ArticleDBTestSuite) TestArticleDB_Create() {
 	assert.Equal(s.T(), result.Title, "new title")
 	assert.Equal(s.T(), result.Content, "new content")
 }
+
+func (s *ArticleDBTestSuite) TestArticleDB_Search() {
+	result, err := s.repo.Search(context.TODO(), "999", "")
+	assert.NoError(s.T(), err)
+
+	assert.NotNil(s.T(), result)
+	assert.EqualValues(s.T(), 123, result[0].UserID)
+	assert.Equal(s.T(), "seeded title 999", result[0].Title)
+	assert.Equal(s.T(), "seeded content 999", result[0].Content)
+
+	result, err = s.repo.Search(context.TODO(), "", "999")
+	assert.NoError(s.T(), err)
+
+	assert.NotNil(s.T(), result)
+	assert.EqualValues(s.T(), 123, result[0].UserID)
+	assert.Equal(s.T(), "seeded title 999", result[0].Title)
+	assert.Equal(s.T(), "seeded content 999", result[0].Content)
+}

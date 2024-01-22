@@ -19,6 +19,7 @@ type ArticleService interface {
 	CreateArticle(ctx context.Context, article *domain.Article) (*domain.Article, error)
 	GetArticle(ctx context.Context, id uint) (*domain.Article, error)
 	ListArticles(ctx context.Context) ([]domain.Article, error)
+	SearchArticles(ctx context.Context, title, content string) ([]domain.Article, error)
 }
 
 type ArticleHandler struct {
@@ -128,6 +129,30 @@ func (h *ArticleHandler) HandleListArticles(ctx *gin.Context) {
 	articles, err := h.svc.ListArticles(ctx.Request.Context())
 	if err != nil {
 		err = fmt.Errorf("v1.HandleListArticles -> h.svc.ListArticles -> %w", err)
+		response.RenderError(ctx, response.NewInternalServerError(err))
+
+		return
+	}
+
+	ctx.JSON(http.StatusOK, articles)
+}
+
+// HandleSearchArticles godoc
+// @Summary      Search articles
+// @Tags         articles
+// @Produce      json
+// @Param        title    query     string  false  "search by title"
+// @Param        content  query     string  false  "search by content"
+// @Success      200      {object}   []domain.Article
+// @Failure      500      {object}   response.ErrResponse
+// @Router       /articles/search [get]
+func (h *ArticleHandler) HandleSearchArticles(ctx *gin.Context) {
+	titleParam := ctx.Query("title")
+	contentParam := ctx.Query("content")
+
+	articles, err := h.svc.SearchArticles(ctx.Request.Context(), titleParam, contentParam)
+	if err != nil {
+		err = fmt.Errorf("v1.HandleSearchArticles -> h.svc.SearchArticles -> %w", err)
 		response.RenderError(ctx, response.NewInternalServerError(err))
 
 		return

@@ -7,9 +7,10 @@ import (
 )
 
 type ArticleServiceMock struct {
-	MockCreate       func(ctx context.Context, article *domain.Article) (*domain.Article, error)
-	MockGetArticle   func(ctx context.Context, id uint) (*domain.Article, error)
-	MockListArticles func(ctx context.Context) ([]domain.Article, error)
+	MockCreate         func(ctx context.Context, article *domain.Article) (*domain.Article, error)
+	MockGetArticle     func(ctx context.Context, id uint) (*domain.Article, error)
+	MockListArticles   func(ctx context.Context) ([]domain.Article, error)
+	MockSearchArticles func(ctx context.Context, title, content string) ([]domain.Article, error)
 }
 
 func NewArticleServiceMock() *ArticleServiceMock {
@@ -26,4 +27,8 @@ func (m *ArticleServiceMock) GetArticle(ctx context.Context, id uint) (*domain.A
 
 func (m *ArticleServiceMock) ListArticles(ctx context.Context) ([]domain.Article, error) {
 	return m.MockListArticles(ctx)
+}
+
+func (m *ArticleServiceMock) SearchArticles(ctx context.Context, title, content string) ([]domain.Article, error) {
+	return m.MockSearchArticles(ctx, title, content)
 }

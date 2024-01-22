@@ -72,3 +72,22 @@ func (d *ArticleDAO) FindAll(ctx context.Context) ([]Article, error) {
 
 	return articles, nil
 }
+
+func (d *ArticleDAO) Search(ctx context.Context, title, content string) ([]Article, error) {
+	var articles []Article
+
+	finder := d.db.WithContext(ctx)
+	if title != "" {
+		finder = finder.Where("title LIKE ?", "%"+title+"%")
+	}
+	if content != "" {
+		finder = finder.Where("content LIKE ?", "%"+content+"%")
+	}
+
+	result := finder.Find(&articles)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return articles, nil
+}

@@ -17,6 +17,7 @@ type ArticleRepository interface {
 	Create(ctx context.Context, article *domain.Article) (*domain.Article, error)
 	FindByID(ctx context.Context, id uint) (*domain.Article, error)
 	FindAll(ctx context.Context) ([]domain.Article, error)
+	Search(ctx context.Context, title, content string) ([]domain.Article, error)
 }
 
 type ArticleService struct {
@@ -51,6 +52,15 @@ func (s *ArticleService) ListArticles(ctx context.Context) ([]domain.Article, er
 	articles, err := s.repo.FindAll(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("s.repo.FindAll -> %w", err)
+	}
+
+	return articles, nil
+}
+
+func (s *ArticleService) SearchArticles(ctx context.Context, title, content string) ([]domain.Article, error) {
+	articles, err := s.repo.Search(ctx, title, content)
+	if err != nil {
+		return nil, fmt.Errorf("s.repo.Search -> %w", err)
 	}
 
 	return articles, nil

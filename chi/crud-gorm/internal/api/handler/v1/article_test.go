@@ -325,3 +325,97 @@ func TestArticleHandler_HandleListArticles(t *testing.T) {
 		})
 	}
 }
+
+func TestArticleHandler_HandleSearchArticles(t *testing.T) {
+	testArticles := []domain.Article{
+		{
+			ID:      999,
+			UserID:  123,
+			Title:   "title 999",
+			Content: "content 999",
+		},
+	}
+	testError := errors.New("test error")
+
+	tests := []struct {
+		name         string
+		setupService func() ArticleService
+		respCode     int
+		want         []domain.Article
+		wantErr      bool
+		err          *response.ErrResponse
+	}{
+		{
+			name: "200 OK",
+			setupService: func() ArticleService {
+				mock := service.NewArticleServiceMock()
+				mock.MockSearchArticles = func(ctx context.Context, title, content string) ([]domain.Article, error) {
+					return testArticles, nil
+				}
+				return mock
+			},
+			respCode: http.StatusOK,
+			wantErr:  false,
+			want:     testArticles,
+			err:      nil,
+		},
+		{
+			name: "500 Internal Server Error - When service returns an error",
+			setupService: func() ArticleService {
+				mock := service.NewArticleServiceMock()
+				mock.MockSearchArticles = func(ctx context.Context, title, content string) ([]domain.Article, error) {
+					return nil, testError
+				}
+				return mock
+			},
+			respCode: http.StatusInternalServerError,
+			wantErr:  true,
+			want:     nil,
+			err:      response.NewInternalServerError(testError),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Prepare handler.
+			svc := tt.setupService()
+			h := NewArticleHandler(svc)
+
+			// Create router and attach handler.
+			r := chi.NewRouter()
+			r.Get("/", h.HandleSearchArticles)
+
+			// Prepare request.
+			req, err := http.NewRequest(http.MethodGet, "/", nil)
+			require.NoError(t, err)
+
+			// Execute request.
+			resp := httptest.NewRecorder()
+			r.ServeHTTP(resp, req)
+
+			// Check the response code.
+			assert.Equal(t, tt.respCode, resp.Code)
+
+			if tt.wantErr {
+				var result response.ErrResponse
+				err := json.Unmarshal(resp.Body.Bytes(), &result)
+
+				assert.NoError(t, err)
+				assert.Equal(t, tt.err.StatusCode, result.StatusCode)
+				assert.Equal(t, tt.err.ErrorMsg, result.ErrorMsg)
+				assert.Equal(t, tt.err.ErrorCode, result.ErrorCode)
+			} else {
+				var result []domain.Article
+				err := json.Unmarshal(resp.Body.Bytes(), &result)
+
+				assert.NoError(t, err)
+				assert.Equal(t, len(tt.want), len(result))
+
+				for i, v := range result {
+					assert.Equal(t, tt.want[i].UserID, v.UserID)
+					assert.Equal(t, tt.want[i].Title, v.Title)
+					assert.Equal(t, tt.want[i].Content, v.Content)
+				}
+			}
+		})
+	}
+}
