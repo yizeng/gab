@@ -364,3 +364,109 @@ func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleListArticles() {
 		})
 	}
 }
+
+func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleSearchArticles() {
+	tests := []struct {
+		name     string
+		query    string
+		respCode int
+		want     []domain.Article
+		wantErr  bool
+		err      *response.ErrResponse
+	}{
+		{
+			name:     "200 OK - by title",
+			query:    "title=999",
+			respCode: http.StatusOK,
+			wantErr:  false,
+			err:      nil,
+			want: []domain.Article{
+				{
+					ID:      999,
+					UserID:  123,
+					Title:   "seeded title 999",
+					Content: "seeded content 999",
+				},
+			},
+		},
+		{
+			name:     "200 OK - by content",
+			query:    "content=999",
+			respCode: http.StatusOK,
+			wantErr:  false,
+			err:      nil,
+			want: []domain.Article{
+				{
+					ID:      999,
+					UserID:  123,
+					Title:   "seeded title 999",
+					Content: "seeded content 999",
+				},
+			},
+		},
+		{
+			name:     "200 OK - When there are no results",
+			query:    "title=no-title&content=no-content",
+			respCode: http.StatusOK,
+			wantErr:  false,
+			err:      nil,
+			want:     []domain.Article{},
+		},
+		{
+			name:     "200 OK - No query parameters",
+			query:    "",
+			respCode: http.StatusOK,
+			wantErr:  false,
+			err:      nil,
+			want: []domain.Article{
+				{
+					ID:      999,
+					UserID:  123,
+					Title:   "seeded title 999",
+					Content: "seeded content 999",
+				},
+				{
+					ID:      888,
+					UserID:  123,
+					Title:   "seeded title 888",
+					Content: "seeded content 888",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		s.T().Run(tt.name, func(t *testing.T) {
+			// Prepare Request.
+			req, err := http.NewRequest("GET", "/api/v1/articles/search?"+tt.query, nil)
+			require.NoError(t, err)
+
+			// Execute Request.
+			resp := executeRequest(req, s.server)
+
+			// Check the response code.
+			assert.Equal(t, tt.respCode, resp.Code)
+
+			if tt.wantErr {
+				var result response.ErrResponse
+				err := json.Unmarshal(resp.Body.Bytes(), &result)
+
+				assert.NoError(t, err)
+				assert.Equal(t, tt.err.StatusCode, result.StatusCode)
+				assert.Equal(t, tt.err.ErrorMsg, result.ErrorMsg)
+				assert.Equal(t, tt.err.ErrorCode, result.ErrorCode)
+			} else {
+				var result []domain.Article
+				err := json.Unmarshal(resp.Body.Bytes(), &result)
+
+				assert.NoError(t, err)
+				assert.Equal(t, len(tt.want), len(result))
+
+				for i, v := range result {
+					assert.Equal(t, tt.want[i].UserID, v.UserID)
+					assert.Equal(t, tt.want[i].Title, v.Title)
+					assert.Equal(t, tt.want[i].Content, v.Content)
+				}
+			}
+		})
+	}
+}

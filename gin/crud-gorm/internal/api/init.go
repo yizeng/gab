@@ -69,6 +69,7 @@ func (s *Server) MountHandlers(articleHandler *v1.ArticleHandler) {
 		apiV1.GET("/articles", articleHandler.HandleListArticles)
 		apiV1.POST("/articles", articleHandler.HandleCreateArticle)
 		apiV1.GET("/articles/:articleID", articleHandler.HandleGetArticle)
+		apiV1.GET("/articles/search", articleHandler.HandleSearchArticles)
 	}
 
 	s.Router.GET("/", v1.HandleHealthcheck)
