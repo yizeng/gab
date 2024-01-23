@@ -2,7 +2,6 @@ package e2e
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -25,7 +24,22 @@ import (
 	"github.com/yizeng/gab/gin/crud-gorm/pkg/dockertester"
 )
 
-type ArticleHandlersTestSuite struct {
+var (
+	testArticle999 = domain.Article{
+		ID:      999,
+		UserID:  123,
+		Title:   "seeded title 999",
+		Content: "seeded content 999",
+	}
+	testArticle888 = domain.Article{
+		ID:      888,
+		UserID:  123,
+		Title:   "seeded title 888",
+		Content: "seeded content 888",
+	}
+)
+
+type ArticleHandlerTestSuite struct {
 	suite.Suite
 
 	db       *gorm.DB
@@ -34,7 +48,7 @@ type ArticleHandlersTestSuite struct {
 	server   *api.Server
 }
 
-func (s *ArticleHandlersTestSuite) SetupSuite() {
+func (s *ArticleHandlerTestSuite) SetupSuite() {
 	// Initialize container.
 	dt := dockertester.InitPostgres()
 	s.pool = dt.Pool
@@ -47,12 +61,12 @@ func (s *ArticleHandlersTestSuite) SetupSuite() {
 	s.db = db
 }
 
-func (s *ArticleHandlersTestSuite) TearDownSuite() {
+func (s *ArticleHandlerTestSuite) TearDownSuite() {
 	err := s.pool.Purge(s.resource) // Destroy the container.
 	require.NoError(s.T(), err)
 }
 
-func (s *ArticleHandlersTestSuite) SetupTest() {
+func (s *ArticleHandlerTestSuite) SetupTest() {
 	// Run migrations.
 	err := dao.InitTables(s.db)
 	require.NoError(s.T(), err)
@@ -74,11 +88,11 @@ func (s *ArticleHandlersTestSuite) SetupTest() {
 	}, s.db)
 }
 
-func (s *ArticleHandlersTestSuite) TearDownTest() {
+func (s *ArticleHandlerTestSuite) TearDownTest() {
 	s.deleteAllArticles()
 }
 
-func (s *ArticleHandlersTestSuite) deleteAllArticles() {
+func (s *ArticleHandlerTestSuite) deleteAllArticles() {
 	script, err := os.ReadFile("../scripts/delete_articles.sql")
 	require.NoError(s.T(), err)
 
@@ -86,94 +100,116 @@ func (s *ArticleHandlersTestSuite) deleteAllArticles() {
 	require.NoError(s.T(), err)
 }
 
-func TestArticleHandlers(t *testing.T) {
-	suite.Run(t, new(ArticleHandlersTestSuite))
+func TestArticleHandler(t *testing.T) {
+	suite.Run(t, new(ArticleHandlerTestSuite))
 }
 
-func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleCreateArticle() {
-	tests := []struct {
-		name         string
+func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
+	type args struct {
 		buildReqBody func() string
-		respCode     int
-		want         *domain.Article
-		wantErr      bool
-		err          *response.ErrResponse
+	}
+	type want struct {
+		article  *domain.Article
+		respCode int
+		err      *response.ErrResponse
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    want
+		wantErr bool
 	}{
 		{
 			name: "201 Created",
-			buildReqBody: func() string {
-				article := request.CreateArticleRequest{
+			args: args{
+				buildReqBody: func() string {
+					article := request.CreateArticleRequest{
+						UserID:  123,
+						Title:   "title 1",
+						Content: "content 1",
+					}
+
+					body, err := json.Marshal(article)
+					require.NoError(s.T(), err)
+
+					return string(body)
+				},
+			},
+			want: want{
+				article: &domain.Article{
 					UserID:  123,
 					Title:   "title 1",
 					Content: "content 1",
-				}
-
-				body, err := json.Marshal(article)
-				require.NoError(s.T(), err)
-
-				return string(body)
+				},
+				respCode: http.StatusCreated,
+				err:      nil,
 			},
-			respCode: http.StatusCreated,
-			wantErr:  false,
-			err:      nil,
-			want: &domain.Article{
-				UserID:  123,
-				Title:   "title 1",
-				Content: "content 1",
-			},
+			wantErr: false,
 		},
 		{
 			name: "400 Bad Request - Missing user_id, Title too long, Content too long",
-			buildReqBody: func() string {
-				article := request.CreateArticleRequest{
-					Title:   uniuri.NewLen(200),
-					Content: uniuri.NewLen(10000),
-				}
+			args: args{
+				buildReqBody: func() string {
+					article := request.CreateArticleRequest{
+						Title:   uniuri.NewLen(200),
+						Content: uniuri.NewLen(10000),
+					}
 
-				body, err := json.Marshal(article)
-				require.NoError(s.T(), err)
+					body, err := json.Marshal(article)
+					require.NoError(s.T(), err)
 
-				return string(body)
+					return string(body)
+				},
 			},
-			respCode: http.StatusBadRequest,
-			wantErr:  true,
-			err:      response.NewBadRequest("content: the length must be between 1 and 5000; title: the length must be between 1 and 128; user_id: cannot be blank."),
-			want:     nil,
+			want: want{
+				article:  nil,
+				respCode: http.StatusBadRequest,
+				err:      response.NewBadRequest("content: the length must be between 1 and 5000; title: the length must be between 1 and 128; user_id: cannot be blank."),
+			},
+			wantErr: true,
 		},
 		{
 			name: "400 Bad Request - invalid JSON",
-			buildReqBody: func() string {
-				return "["
+			args: args{
+				buildReqBody: func() string {
+					return "["
+				},
 			},
-			respCode: http.StatusBadRequest,
-			wantErr:  true,
-			err:      response.NewBadRequest("unexpected EOF"),
-			want:     nil,
+			want: want{
+				article:  nil,
+				respCode: http.StatusBadRequest,
+				err:      response.NewBadRequest("unexpected EOF"),
+			},
+			wantErr: true,
 		},
 		{
 			name: "400 Bad Request - Already exists",
-			buildReqBody: func() string {
-				article := request.CreateArticleRequest{
-					UserID:  123,
-					Title:   "seeded title 999",
-					Content: "seeded content 999",
-				}
+			args: args{
+				buildReqBody: func() string {
+					article := request.CreateArticleRequest{
+						UserID:  123,
+						Title:   "seeded title 999",
+						Content: "seeded content 999",
+					}
 
-				body, err := json.Marshal(article)
-				require.NoError(s.T(), err)
+					body, err := json.Marshal(article)
+					require.NoError(s.T(), err)
 
-				return string(body)
+					return string(body)
+				},
 			},
-			respCode: http.StatusBadRequest,
-			wantErr:  true,
-			err:      response.NewBadRequest("article already exists"),
-			want:     nil,
+			want: want{
+				article:  nil,
+				respCode: http.StatusBadRequest,
+				err:      response.NewBadRequest("article already exists"),
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		s.T().Run(tt.name, func(t *testing.T) {
 			// Prepare Request.
-			body := tt.buildReqBody()
+			body := tt.args.buildReqBody()
 			req, err := http.NewRequest("POST", "/api/v1/articles", strings.NewReader(body))
 			require.NoError(t, err)
 
@@ -181,203 +217,239 @@ func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleCreateArticle() {
 			resp := executeRequest(req, s.server)
 
 			// Check the response code.
-			assert.Equal(t, tt.respCode, resp.Code)
+			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
 				var result response.ErrResponse
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.err.StatusCode, result.StatusCode)
-				assert.Equal(t, tt.err.ErrorMsg, result.ErrorMsg)
-				assert.Equal(t, tt.err.ErrorCode, result.ErrorCode)
+				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
+				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
+				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {
 				var result domain.Article
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want.UserID, result.UserID)
-				assert.Equal(t, tt.want.Title, result.Title)
-				assert.Equal(t, tt.want.Content, result.Content)
+				assert.Equal(t, tt.want.article.UserID, result.UserID)
+				assert.Equal(t, tt.want.article.Title, result.Title)
+				assert.Equal(t, tt.want.article.Content, result.Content)
 			}
 		})
 	}
 }
 
-func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleGetArticle() {
-	tests := []struct {
-		name      string
+func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
+	type args struct {
 		articleID string
-		respCode  int
-		want      *domain.Article
-		wantErr   bool
-		err       *response.ErrResponse
+	}
+	type want struct {
+		article  *domain.Article
+		respCode int
+		err      *response.ErrResponse
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    want
+		wantErr bool
 	}{
 		{
-			name:      "200 OK",
-			articleID: "999",
-			respCode:  http.StatusOK,
-			wantErr:   false,
-			err:       nil,
-			want: &domain.Article{
-				ID:      999,
-				UserID:  123,
-				Title:   "seeded title 999",
-				Content: "seeded content 999",
+			name: "200 OK",
+			args: args{
+				articleID: "999",
 			},
+			want: want{
+				article:  &testArticle999,
+				respCode: http.StatusOK,
+				err:      nil,
+			},
+			wantErr: false,
 		},
 		{
-			name:      "404 Not Found - articleID is not found",
-			articleID: "1",
-			respCode:  http.StatusNotFound,
-			wantErr:   true,
-			err:       response.NewNotFound("article", "ID", "1"),
-			want:      nil,
+			name: "404 Not Found - articleID is not found",
+			args: args{
+				articleID: "1",
+			},
+			want: want{
+				article:  nil,
+				respCode: http.StatusNotFound,
+				err:      response.NewNotFound("article", "ID", "1"),
+			},
+			wantErr: true,
 		},
 		{
-			name:      "404 Not Found - articleID is negative",
-			articleID: "-1",
-			respCode:  http.StatusNotFound,
-			wantErr:   true,
-			err:       response.NewNotFound("article", "ID", "-1"),
-			want:      nil,
+			name: "404 Not Found - articleID is negative",
+			args: args{
+				articleID: "-1",
+			},
+			want: want{
+				article:  nil,
+				respCode: http.StatusNotFound,
+				err:      response.NewNotFound("article", "ID", "-1"),
+			},
+			wantErr: true,
 		},
 		{
-			name:      "400 Bad Request - invalid articleID",
-			articleID: "abc",
-			respCode:  http.StatusBadRequest,
-			wantErr:   true,
-			err:       response.NewInvalidInput("articleID", "abc"),
-			want:      nil,
+			name: "400 Bad Request - invalid articleID",
+			args: args{
+				articleID: "abc",
+			},
+			want: want{
+				article:  nil,
+				respCode: http.StatusBadRequest,
+				err:      response.NewInvalidInput("articleID", "abc"),
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		s.T().Run(tt.name, func(t *testing.T) {
 			// Prepare Request.
-			url := fmt.Sprintf("/api/v1/articles/%v", tt.articleID)
-			req, err := http.NewRequest("GET", url, nil)
+			req, err := http.NewRequest("GET", "/api/v1/articles/"+tt.args.articleID, nil)
 			require.NoError(t, err)
 
 			// Execute Request.
 			resp := executeRequest(req, s.server)
 
 			// Check the response code.
-			assert.Equal(t, tt.respCode, resp.Code)
+			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
 				var result response.ErrResponse
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.err.StatusCode, result.StatusCode)
-				assert.Equal(t, tt.err.ErrorMsg, result.ErrorMsg)
-				assert.Equal(t, tt.err.ErrorCode, result.ErrorCode)
+				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
+				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
+				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {
 				var result domain.Article
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want.UserID, result.UserID)
-				assert.Equal(t, tt.want.Title, result.Title)
-				assert.Equal(t, tt.want.Content, result.Content)
+				assert.Equal(t, tt.want.article.UserID, result.UserID)
+				assert.Equal(t, tt.want.article.Title, result.Title)
+				assert.Equal(t, tt.want.article.Content, result.Content)
 			}
 		})
 	}
 }
 
-func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleListArticles() {
-	tests := []struct {
-		name     string
-		setup    func()
-		query    string
+func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleListArticles() {
+	type args struct {
+		query string
+	}
+	type want struct {
+		articles []domain.Article
 		respCode int
-		want     []domain.Article
-		wantErr  bool
 		err      *response.ErrResponse
+	}
+	tests := []struct {
+		name    string
+		setup   func()
+		args    args
+		want    want
+		wantErr bool
 	}{
 		{
-			name:     "200 OK",
-			setup:    func() {},
-			query:    "",
-			respCode: http.StatusOK,
-			wantErr:  false,
-			err:      nil,
-			want: []domain.Article{
-				{
-					ID:      999,
-					UserID:  123,
-					Title:   "seeded title 999",
-					Content: "seeded content 999",
-				}, {
-					ID:      888,
-					UserID:  123,
-					Title:   "seeded title 888",
-					Content: "seeded content 888",
-				},
+			name:  "200 OK",
+			setup: func() {},
+			args: args{
+				query: "",
 			},
+			want: want{
+				articles: []domain.Article{
+					testArticle999,
+					testArticle888,
+				},
+				respCode: http.StatusOK,
+				err:      nil,
+			},
+			wantErr: false,
 		},
 		{
-			name:     "200 OK - With pagination",
-			setup:    func() {},
-			query:    "?page=2&per_page=1",
-			respCode: http.StatusOK,
-			wantErr:  false,
-			err:      nil,
-			want: []domain.Article{
-				{
-					ID:      888,
-					UserID:  123,
-					Title:   "seeded title 888",
-					Content: "seeded content 888",
-				},
+			name:  "200 OK - With pagination",
+			setup: func() {},
+			args: args{
+				query: "?page=2&per_page=1",
 			},
+			want: want{
+				articles: []domain.Article{
+					testArticle888,
+				},
+				respCode: http.StatusOK,
+				err:      nil,
+			},
+			wantErr: false,
 		},
 		{
 			name: "200 OK - When there are no articles",
 			setup: func() {
 				s.deleteAllArticles()
 			},
-			query:    "?page=1&per_page=2",
-			respCode: http.StatusOK,
-			wantErr:  false,
-			err:      nil,
-			want:     []domain.Article{},
+			args: args{
+				query: "?page=1&per_page=2",
+			},
+			want: want{
+				articles: []domain.Article{},
+				respCode: http.StatusOK,
+				err:      nil,
+			},
+			wantErr: false,
 		},
 		{
-			name:     "400 Bad Request - Invalid page query",
-			setup:    func() {},
-			query:    "?page=abc&per_page=2",
-			respCode: http.StatusBadRequest,
-			wantErr:  true,
-			err:      response.NewInvalidInput("page", "abc"),
-			want:     []domain.Article{},
+			name:  "400 Bad Request - Invalid page query",
+			setup: func() {},
+			args: args{
+				query: "?page=abc&per_page=2",
+			},
+			want: want{
+				articles: []domain.Article{},
+				respCode: http.StatusBadRequest,
+				err:      response.NewInvalidInput("page", "abc"),
+			},
+			wantErr: true,
 		},
 		{
-			name:     "400 Bad Request - Negative page query",
-			setup:    func() {},
-			query:    "?page=-123&per_page=2",
-			respCode: http.StatusBadRequest,
-			wantErr:  true,
-			err:      response.NewInvalidInput("page", "-123"),
-			want:     []domain.Article{},
+			name:  "400 Bad Request - Negative page query",
+			setup: func() {},
+			args: args{
+				query: "?page=-123&per_page=2",
+			},
+			want: want{
+				articles: []domain.Article{},
+				respCode: http.StatusBadRequest,
+				err:      response.NewInvalidInput("page", "-123"),
+			},
+			wantErr: true,
 		},
 		{
-			name:     "400 Bad Request - Invalid per_page query",
-			setup:    func() {},
-			query:    "?page=1&per_page=abc",
-			respCode: http.StatusBadRequest,
-			wantErr:  true,
-			err:      response.NewInvalidInput("per_page", "abc"),
-			want:     []domain.Article{},
+			name:  "400 Bad Request - Invalid per_page query",
+			setup: func() {},
+			args: args{
+				query: "?page=1&per_page=abc",
+			},
+			want: want{
+				articles: []domain.Article{},
+				respCode: http.StatusBadRequest,
+				err:      response.NewInvalidInput("per_page", "abc"),
+			},
+			wantErr: true,
 		},
 		{
-			name:     "400 Bad Request - Negative per_page query",
-			setup:    func() {},
-			query:    "?page=1&per_page=-123",
-			respCode: http.StatusBadRequest,
-			wantErr:  true,
-			err:      response.NewInvalidInput("per_page", "-123"),
-			want:     []domain.Article{},
+			name:  "400 Bad Request - Negative per_page query",
+			setup: func() {},
+			args: args{
+				query: "?page=1&per_page=-123",
+			},
+			want: want{
+				articles: []domain.Article{},
+				respCode: http.StatusBadRequest,
+				err:      response.NewInvalidInput("per_page", "-123"),
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -386,140 +458,146 @@ func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleListArticles() {
 			tt.setup()
 
 			// Prepare Request.
-			req, err := http.NewRequest("GET", "/api/v1/articles"+tt.query, nil)
+			req, err := http.NewRequest("GET", "/api/v1/articles"+tt.args.query, nil)
 			require.NoError(t, err)
 
 			// Execute Request.
 			resp := executeRequest(req, s.server)
 
 			// Check the response code.
-			assert.Equal(t, tt.respCode, resp.Code)
+			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
 				var result response.ErrResponse
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.err.StatusCode, result.StatusCode)
-				assert.Equal(t, tt.err.ErrorMsg, result.ErrorMsg)
-				assert.Equal(t, tt.err.ErrorCode, result.ErrorCode)
+				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
+				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
+				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {
 				var result []domain.Article
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, len(tt.want), len(result))
+				assert.Equal(t, len(tt.want.articles), len(result))
 
 				for i, v := range result {
-					assert.Equal(t, tt.want[i].UserID, v.UserID)
-					assert.Equal(t, tt.want[i].Title, v.Title)
-					assert.Equal(t, tt.want[i].Content, v.Content)
+					wantArticle := tt.want.articles[i]
+
+					assert.Equal(t, wantArticle.UserID, v.UserID)
+					assert.Equal(t, wantArticle.Title, v.Title)
+					assert.Equal(t, wantArticle.Content, v.Content)
 				}
 			}
 		})
 	}
 }
 
-func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleSearchArticles() {
-	tests := []struct {
-		name     string
-		query    string
+func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleSearchArticles() {
+	type args struct {
+		query string
+	}
+	type want struct {
+		articles []domain.Article
 		respCode int
-		want     []domain.Article
-		wantErr  bool
 		err      *response.ErrResponse
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    want
+		wantErr bool
 	}{
 		{
-			name:     "200 OK - by title",
-			query:    "title=999",
-			respCode: http.StatusOK,
-			wantErr:  false,
-			err:      nil,
-			want: []domain.Article{
-				{
-					ID:      999,
-					UserID:  123,
-					Title:   "seeded title 999",
-					Content: "seeded content 999",
-				},
+			name: "200 OK - by title",
+			args: args{
+				query: "title=999",
 			},
+			want: want{
+				articles: []domain.Article{
+					testArticle999,
+				},
+				respCode: http.StatusOK,
+				err:      nil,
+			},
+			wantErr: false,
 		},
 		{
-			name:     "200 OK - by content",
-			query:    "content=999",
-			respCode: http.StatusOK,
-			wantErr:  false,
-			err:      nil,
-			want: []domain.Article{
-				{
-					ID:      999,
-					UserID:  123,
-					Title:   "seeded title 999",
-					Content: "seeded content 999",
-				},
+			name: "200 OK - by content",
+			args: args{
+				query: "content=999",
 			},
+			want: want{
+				articles: []domain.Article{
+					testArticle999,
+				},
+				respCode: http.StatusOK,
+				err:      nil,
+			},
+			wantErr: false,
 		},
 		{
-			name:     "200 OK - When there are no results",
-			query:    "title=no-title&content=no-content",
-			respCode: http.StatusOK,
-			wantErr:  false,
-			err:      nil,
-			want:     []domain.Article{},
+			name: "200 OK - When there are no results",
+			args: args{
+				query: "title=no-title&content=no-content",
+			},
+			want: want{
+				articles: []domain.Article{},
+				respCode: http.StatusOK,
+				err:      nil,
+			},
+			wantErr: false,
 		},
 		{
-			name:     "200 OK - No query parameters",
-			query:    "",
-			respCode: http.StatusOK,
-			wantErr:  false,
-			err:      nil,
-			want: []domain.Article{
-				{
-					ID:      999,
-					UserID:  123,
-					Title:   "seeded title 999",
-					Content: "seeded content 999",
-				},
-				{
-					ID:      888,
-					UserID:  123,
-					Title:   "seeded title 888",
-					Content: "seeded content 888",
-				},
+			name: "200 OK - No query parameters",
+			args: args{
+				query: "",
 			},
+			want: want{
+				articles: []domain.Article{
+					testArticle999,
+					testArticle888,
+				},
+				respCode: http.StatusOK,
+				err:      nil,
+			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		s.T().Run(tt.name, func(t *testing.T) {
 			// Prepare Request.
-			req, err := http.NewRequest("GET", "/api/v1/articles/search?"+tt.query, nil)
+			req, err := http.NewRequest("GET", "/api/v1/articles/search?"+tt.args.query, nil)
 			require.NoError(t, err)
 
 			// Execute Request.
 			resp := executeRequest(req, s.server)
 
 			// Check the response code.
-			assert.Equal(t, tt.respCode, resp.Code)
+			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
 				var result response.ErrResponse
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.err.StatusCode, result.StatusCode)
-				assert.Equal(t, tt.err.ErrorMsg, result.ErrorMsg)
-				assert.Equal(t, tt.err.ErrorCode, result.ErrorCode)
+				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
+				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
+				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {
 				var result []domain.Article
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, len(tt.want), len(result))
+				assert.Equal(t, len(tt.want.articles), len(result))
 
 				for i, v := range result {
-					assert.Equal(t, tt.want[i].UserID, v.UserID)
-					assert.Equal(t, tt.want[i].Title, v.Title)
-					assert.Equal(t, tt.want[i].Content, v.Content)
+					wantArticle := tt.want.articles[i]
+
+					assert.Equal(t, wantArticle.UserID, v.UserID)
+					assert.Equal(t, wantArticle.Title, v.Title)
+					assert.Equal(t, wantArticle.Content, v.Content)
 				}
 			}
 		})

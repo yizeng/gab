@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -21,81 +20,114 @@ import (
 	"github.com/yizeng/gab/gin/crud-gorm/internal/service"
 )
 
-func TestArticleHandler_HandleCreateArticle(t *testing.T) {
-	testArticle := &domain.Article{
-		ID:      999,
+var (
+	testArticleFoo = domain.Article{
+		ID:      1,
 		UserID:  123,
-		Title:   "title",
-		Content: "content",
+		Title:   "title foo",
+		Content: "content foo",
 	}
-	testError := errors.New("test error")
+	testArticleBar = domain.Article{
+		ID:      2,
+		UserID:  123,
+		Title:   "title bar",
+		Content: "content bar",
+	}
+	testArticles = []domain.Article{
+		testArticleFoo,
+		testArticleBar,
+	}
+	testErr = errors.New("something happened")
+)
 
-	tests := []struct {
-		name         string
+func TestArticleHandler_HandleCreateArticle(t *testing.T) {
+	type fields struct {
 		setupService func() ArticleService
+	}
+	type args struct {
 		buildReqBody func() string
-		respCode     int
-		want         *domain.Article
-		wantErr      bool
-		err          *response.ErrResponse
+	}
+	type want struct {
+		article  *domain.Article
+		respCode int
+		err      *response.ErrResponse
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    want
+		wantErr bool
 	}{
 		{
 			name: "201 Created",
-			setupService: func() ArticleService {
-				mock := service.NewArticleServiceMock()
-				mock.MockCreate = func(ctx context.Context, article *domain.Article) (*domain.Article, error) {
-					return testArticle, nil
-				}
-				return mock
+			fields: fields{
+				setupService: func() ArticleService {
+					mock := service.NewArticleServiceMock()
+					mock.MockCreate = func(ctx context.Context, article *domain.Article) (*domain.Article, error) {
+						return &testArticleFoo, nil
+					}
+					return mock
+				},
 			},
-			buildReqBody: func() string {
-				article := request.CreateArticleRequest{
-					UserID:  123,
-					Title:   "title",
-					Content: "content",
-				}
+			args: args{
+				buildReqBody: func() string {
+					article := request.CreateArticleRequest{
+						UserID:  123,
+						Title:   "title",
+						Content: "content",
+					}
 
-				body, err := json.Marshal(article)
-				require.NoError(t, err)
+					body, err := json.Marshal(article)
+					require.NoError(t, err)
 
-				return string(body)
+					return string(body)
+				},
 			},
-			respCode: http.StatusCreated,
-			wantErr:  false,
-			want:     testArticle,
-			err:      nil,
+			want: want{
+				respCode: http.StatusCreated,
+				article:  &testArticleFoo,
+				err:      nil,
+			},
+			wantErr: false,
 		},
 		{
 			name: "500 Internal Server Error - When service returns an error",
-			setupService: func() ArticleService {
-				mock := service.NewArticleServiceMock()
-				mock.MockCreate = func(ctx context.Context, article *domain.Article) (*domain.Article, error) {
-					return nil, testError
-				}
-				return mock
+			fields: fields{
+				setupService: func() ArticleService {
+					mock := service.NewArticleServiceMock()
+					mock.MockCreate = func(ctx context.Context, article *domain.Article) (*domain.Article, error) {
+						return nil, testErr
+					}
+					return mock
+				},
 			},
-			buildReqBody: func() string {
-				article := request.CreateArticleRequest{
-					UserID:  123,
-					Title:   "title",
-					Content: "content",
-				}
+			args: args{
+				buildReqBody: func() string {
+					article := request.CreateArticleRequest{
+						UserID:  123,
+						Title:   "title",
+						Content: "content",
+					}
 
-				body, err := json.Marshal(article)
-				require.NoError(t, err)
+					body, err := json.Marshal(article)
+					require.NoError(t, err)
 
-				return string(body)
+					return string(body)
+				},
 			},
-			respCode: http.StatusInternalServerError,
-			wantErr:  true,
-			want:     nil,
-			err:      response.NewInternalServerError(testError),
+			want: want{
+				article:  nil,
+				respCode: http.StatusInternalServerError,
+				err:      response.NewInternalServerError(testErr),
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Prepare handler.
-			svc := tt.setupService()
+			svc := tt.fields.setupService()
 			h := NewArticleHandler(svc)
 
 			// Create router and attach handler.
@@ -104,7 +136,7 @@ func TestArticleHandler_HandleCreateArticle(t *testing.T) {
 			r.POST("/", h.HandleCreateArticle)
 
 			// Prepare request.
-			body := tt.buildReqBody()
+			body := tt.args.buildReqBody()
 			req, err := http.NewRequest(http.MethodPost, "/", strings.NewReader(body))
 			req.Header.Set("Content-Type", "application/json")
 			require.NoError(t, err)
@@ -114,82 +146,94 @@ func TestArticleHandler_HandleCreateArticle(t *testing.T) {
 			r.ServeHTTP(resp, req)
 
 			// Check the response code.
-			assert.Equal(t, tt.respCode, resp.Code)
+			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
 				var result response.ErrResponse
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.err.StatusCode, result.StatusCode)
-				assert.Equal(t, tt.err.ErrorMsg, result.ErrorMsg)
-				assert.Equal(t, tt.err.ErrorCode, result.ErrorCode)
+				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
+				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
+				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {
 				var result domain.Article
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want.UserID, result.UserID)
-				assert.Equal(t, tt.want.Title, result.Title)
-				assert.Equal(t, tt.want.Content, result.Content)
+				assert.Equal(t, tt.want.article.UserID, result.UserID)
+				assert.Equal(t, tt.want.article.Title, result.Title)
+				assert.Equal(t, tt.want.article.Content, result.Content)
 			}
 		})
 	}
 }
 
 func TestArticleHandler_HandleGetArticle(t *testing.T) {
-	testArticle := &domain.Article{
-		ID:      999,
-		UserID:  123,
-		Title:   "title",
-		Content: "content",
-	}
-	testError := errors.New("test error")
-
-	tests := []struct {
-		name         string
+	type fields struct {
 		setupService func() ArticleService
-		articleID    string
-		respCode     int
-		want         *domain.Article
-		wantErr      bool
-		err          *response.ErrResponse
+	}
+	type args struct {
+		articleID string
+	}
+	type want struct {
+		article  *domain.Article
+		respCode int
+		err      *response.ErrResponse
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    want
+		wantErr bool
 	}{
 		{
 			name: "200 OK",
-			setupService: func() ArticleService {
-				mock := service.NewArticleServiceMock()
-				mock.MockGetArticle = func(ctx context.Context, id uint) (*domain.Article, error) {
-					return testArticle, nil
-				}
-				return mock
+			fields: fields{
+				setupService: func() ArticleService {
+					mock := service.NewArticleServiceMock()
+					mock.MockGetArticle = func(ctx context.Context, id uint) (*domain.Article, error) {
+						return &testArticleFoo, nil
+					}
+					return mock
+				},
 			},
-			articleID: "999",
-			respCode:  http.StatusOK,
-			wantErr:   false,
-			want:      testArticle,
-			err:       nil,
+			args: args{
+				articleID: "999",
+			},
+			want: want{
+				article:  &testArticleFoo,
+				respCode: http.StatusOK,
+				err:      nil,
+			},
 		},
 		{
 			name: "500 Internal Server Error - When service returns an error",
-			setupService: func() ArticleService {
-				mock := service.NewArticleServiceMock()
-				mock.MockGetArticle = func(ctx context.Context, id uint) (*domain.Article, error) {
-					return nil, testError
-				}
-				return mock
+			fields: fields{
+				setupService: func() ArticleService {
+					mock := service.NewArticleServiceMock()
+					mock.MockGetArticle = func(ctx context.Context, id uint) (*domain.Article, error) {
+						return nil, testErr
+					}
+					return mock
+				},
 			},
-			articleID: "999",
-			respCode:  http.StatusInternalServerError,
-			wantErr:   true,
-			want:      nil,
-			err:       response.NewInternalServerError(testError),
+			args: args{
+				articleID: "999",
+			},
+			want: want{
+				article:  nil,
+				respCode: http.StatusInternalServerError,
+				err:      response.NewInternalServerError(testErr),
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Prepare handler.
-			svc := tt.setupService()
+			svc := tt.fields.setupService()
 			h := NewArticleHandler(svc)
 
 			// Create router and attach handler.
@@ -198,8 +242,7 @@ func TestArticleHandler_HandleGetArticle(t *testing.T) {
 			r.GET("/:articleID", h.HandleGetArticle)
 
 			// Prepare request.
-			url := fmt.Sprintf("/%v", tt.articleID)
-			req, err := http.NewRequest(http.MethodGet, url, nil)
+			req, err := http.NewRequest(http.MethodGet, "/"+tt.args.articleID, nil)
 			require.NoError(t, err)
 
 			// Execute request.
@@ -207,86 +250,85 @@ func TestArticleHandler_HandleGetArticle(t *testing.T) {
 			r.ServeHTTP(resp, req)
 
 			// Check the response code.
-			assert.Equal(t, tt.respCode, resp.Code)
+			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
 				var result response.ErrResponse
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.err.StatusCode, result.StatusCode)
-				assert.Equal(t, tt.err.ErrorMsg, result.ErrorMsg)
-				assert.Equal(t, tt.err.ErrorCode, result.ErrorCode)
+				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
+				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
+				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {
 				var result domain.Article
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want.UserID, result.UserID)
-				assert.Equal(t, tt.want.Title, result.Title)
-				assert.Equal(t, tt.want.Content, result.Content)
+				assert.Equal(t, tt.want.article.UserID, result.UserID)
+				assert.Equal(t, tt.want.article.Title, result.Title)
+				assert.Equal(t, tt.want.article.Content, result.Content)
 			}
 		})
 	}
 }
 
 func TestArticleHandler_HandleListArticles(t *testing.T) {
-	testArticles := []domain.Article{
-		{
-			ID:      999,
-			UserID:  123,
-			Title:   "title 999",
-			Content: "content 999",
-		}, {
-			ID:      888,
-			UserID:  123,
-			Title:   "title 888",
-			Content: "content 888",
-		},
-	}
-	testError := errors.New("test error")
-
-	tests := []struct {
-		name         string
+	type fields struct {
 		setupService func() ArticleService
-		respCode     int
-		want         []domain.Article
-		wantErr      bool
-		err          *response.ErrResponse
+	}
+	type want struct {
+		articles []domain.Article
+		respCode int
+		err      *response.ErrResponse
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    want
+		wantErr bool
 	}{
 		{
 			name: "200 OK",
-			setupService: func() ArticleService {
-				mock := service.NewArticleServiceMock()
-				mock.MockListArticles = func(ctx context.Context, page, perPage uint) ([]domain.Article, error) {
-					return testArticles, nil
-				}
-				return mock
+			fields: fields{
+				setupService: func() ArticleService {
+					mock := service.NewArticleServiceMock()
+					mock.MockListArticles = func(ctx context.Context, per, perPage uint) ([]domain.Article, error) {
+						return testArticles, nil
+					}
+					return mock
+				},
 			},
-			respCode: http.StatusOK,
-			wantErr:  false,
-			want:     testArticles,
-			err:      nil,
+			want: want{
+				articles: testArticles,
+				respCode: http.StatusOK,
+				err:      nil,
+			},
+			wantErr: false,
 		},
 		{
 			name: "500 Internal Server Error - When service returns an error",
-			setupService: func() ArticleService {
-				mock := service.NewArticleServiceMock()
-				mock.MockListArticles = func(ctx context.Context, page, perPage uint) ([]domain.Article, error) {
-					return nil, testError
-				}
-				return mock
+			fields: fields{
+				setupService: func() ArticleService {
+					mock := service.NewArticleServiceMock()
+					mock.MockListArticles = func(ctx context.Context, per, perPage uint) ([]domain.Article, error) {
+						return nil, testErr
+					}
+					return mock
+				},
 			},
-			respCode: http.StatusInternalServerError,
-			wantErr:  true,
-			want:     nil,
-			err:      response.NewInternalServerError(testError),
+			want: want{
+				articles: nil,
+				respCode: http.StatusInternalServerError,
+				err:      response.NewInternalServerError(testErr),
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Prepare handler.
-			svc := tt.setupService()
+			svc := tt.fields.setupService()
 			h := NewArticleHandler(svc)
 
 			// Create router and attach handler.
@@ -303,27 +345,29 @@ func TestArticleHandler_HandleListArticles(t *testing.T) {
 			r.ServeHTTP(resp, req)
 
 			// Check the response code.
-			assert.Equal(t, tt.respCode, resp.Code)
+			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
 				var result response.ErrResponse
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.err.StatusCode, result.StatusCode)
-				assert.Equal(t, tt.err.ErrorMsg, result.ErrorMsg)
-				assert.Equal(t, tt.err.ErrorCode, result.ErrorCode)
+				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
+				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
+				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {
 				var result []domain.Article
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, len(tt.want), len(result))
+				assert.Equal(t, len(tt.want.articles), len(result))
 
 				for i, v := range result {
-					assert.Equal(t, tt.want[i].UserID, v.UserID)
-					assert.Equal(t, tt.want[i].Title, v.Title)
-					assert.Equal(t, tt.want[i].Content, v.Content)
+					wantArticle := tt.want.articles[i]
+
+					assert.Equal(t, wantArticle.UserID, v.UserID)
+					assert.Equal(t, wantArticle.Title, v.Title)
+					assert.Equal(t, wantArticle.Content, v.Content)
 				}
 			}
 		})
@@ -362,57 +406,61 @@ func TestArticleHandler_HandleListArticles_NotUsingPaginationMiddleware(t *testi
 }
 
 func TestArticleHandler_HandleSearchArticles(t *testing.T) {
-	testArticles := []domain.Article{
-		{
-			ID:      999,
-			UserID:  123,
-			Title:   "title 999",
-			Content: "content 999",
-		},
-	}
-	testError := errors.New("test error")
-
-	tests := []struct {
-		name         string
+	type fields struct {
 		setupService func() ArticleService
-		respCode     int
-		want         []domain.Article
-		wantErr      bool
-		err          *response.ErrResponse
+	}
+	type want struct {
+		articles []domain.Article
+		respCode int
+		err      *response.ErrResponse
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    want
+		wantErr bool
 	}{
 		{
 			name: "200 OK",
-			setupService: func() ArticleService {
-				mock := service.NewArticleServiceMock()
-				mock.MockSearchArticles = func(ctx context.Context, title, content string) ([]domain.Article, error) {
-					return testArticles, nil
-				}
-				return mock
+			fields: fields{
+				setupService: func() ArticleService {
+					mock := service.NewArticleServiceMock()
+					mock.MockSearchArticles = func(ctx context.Context, title, content string) ([]domain.Article, error) {
+						return testArticles, nil
+					}
+					return mock
+				},
 			},
-			respCode: http.StatusOK,
-			wantErr:  false,
-			want:     testArticles,
-			err:      nil,
+			want: want{
+				articles: testArticles,
+				respCode: http.StatusOK,
+				err:      nil,
+			},
+			wantErr: false,
 		},
 		{
 			name: "500 Internal Server Error - When service returns an error",
-			setupService: func() ArticleService {
-				mock := service.NewArticleServiceMock()
-				mock.MockSearchArticles = func(ctx context.Context, title, content string) ([]domain.Article, error) {
-					return nil, testError
-				}
-				return mock
+			fields: fields{
+				setupService: func() ArticleService {
+					mock := service.NewArticleServiceMock()
+					mock.MockSearchArticles = func(ctx context.Context, title, content string) ([]domain.Article, error) {
+						return nil, testErr
+					}
+					return mock
+				},
 			},
-			respCode: http.StatusInternalServerError,
-			wantErr:  true,
-			want:     nil,
-			err:      response.NewInternalServerError(testError),
+			want: want{
+				articles: nil,
+				respCode: http.StatusInternalServerError,
+				err:      response.NewInternalServerError(testErr),
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Prepare handler.
-			svc := tt.setupService()
+			svc := tt.fields.setupService()
 			h := NewArticleHandler(svc)
 
 			// Create router and attach handler.
@@ -429,27 +477,29 @@ func TestArticleHandler_HandleSearchArticles(t *testing.T) {
 			r.ServeHTTP(resp, req)
 
 			// Check the response code.
-			assert.Equal(t, tt.respCode, resp.Code)
+			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
 				var result response.ErrResponse
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.err.StatusCode, result.StatusCode)
-				assert.Equal(t, tt.err.ErrorMsg, result.ErrorMsg)
-				assert.Equal(t, tt.err.ErrorCode, result.ErrorCode)
+				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
+				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
+				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {
 				var result []domain.Article
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, len(tt.want), len(result))
+				assert.Equal(t, len(tt.want.articles), len(result))
 
 				for i, v := range result {
-					assert.Equal(t, tt.want[i].UserID, v.UserID)
-					assert.Equal(t, tt.want[i].Title, v.Title)
-					assert.Equal(t, tt.want[i].Content, v.Content)
+					wantArticle := tt.want.articles[i]
+
+					assert.Equal(t, wantArticle.UserID, v.UserID)
+					assert.Equal(t, wantArticle.Title, v.Title)
+					assert.Equal(t, wantArticle.Content, v.Content)
 				}
 			}
 		})

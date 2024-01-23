@@ -27,19 +27,19 @@ func TestLoad(t *testing.T) {
 	}
 	tests := []struct {
 		name       string
-		args       args
 		setupENV   func()
+		args       args
 		want       *AppConfig
 		wantErr    bool
 		wantErrMsg string
 	}{
 		{
 			name: "Happy Path",
-			args: args{
-				configFile: "testdata/good.yml",
-			},
 			setupENV: func() {
 				setENVs(t)
+			},
+			args: args{
+				configFile: "testdata/good.yml",
 			},
 			want: &AppConfig{
 				API: &APIConfig{
@@ -60,45 +60,45 @@ func TestLoad(t *testing.T) {
 			wantErrMsg: "",
 		},
 		{
-			name: "Missing keys",
+			name:     "Missing keys",
+			setupENV: func() {},
 			args: args{
 				configFile: "testdata/missing_keys.yml",
 			},
-			setupENV:   func() {},
 			want:       nil,
 			wantErr:    true,
 			wantErrMsg: "conf.validateConfig -> c.validate() -> API: cannot be blank; Postgres: cannot be blank.",
 		},
 		{
-			name: "Invalid YAML file",
+			name:     "Invalid YAML file",
+			setupENV: func() {},
 			args: args{
 				configFile: "testdata/invalid_yaml.yml",
 			},
-			setupENV:   func() {},
 			want:       nil,
 			wantErr:    true,
 			wantErrMsg: "viper.ReadInConfig -> While parsing config: yaml: line 2: mapping values are not allowed in this context",
 		},
 		{
-			name: "Unable to marshal",
+			name:     "Unable to marshal",
+			setupENV: func() {},
 			args: args{
 				configFile: "testdata/unmarshallable.yml",
 			},
-			setupENV:   func() {},
 			want:       nil,
 			wantErr:    true,
 			wantErrMsg: "viper.Unmarshal -> 1 error(s) decoding:\n\n* 'API' expected a map, got 'slice'",
 		},
 		{
 			name: "Invalid API configs - missing port",
-			args: args{
-				configFile: "testdata/good.yml",
-			},
 			setupENV: func() {
 				setENVs(t)
 
 				err := os.Unsetenv("API_PORT")
 				require.NoError(t, err)
+			},
+			args: args{
+				configFile: "testdata/good.yml",
 			},
 			want:       nil,
 			wantErr:    true,
@@ -106,14 +106,14 @@ func TestLoad(t *testing.T) {
 		},
 		{
 			name: "Invalid Postgres configs - missing DB",
-			args: args{
-				configFile: "testdata/good.yml",
-			},
 			setupENV: func() {
 				setENVs(t)
 
 				err := os.Unsetenv("POSTGRES_DB")
 				require.NoError(t, err)
+			},
+			args: args{
+				configFile: "testdata/good.yml",
 			},
 			want:       nil,
 			wantErr:    true,
@@ -123,6 +123,7 @@ func TestLoad(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setupENV()
+			defer os.Clearenv()
 
 			got, err := Load(tt.args.configFile)
 			if (err != nil) != tt.wantErr {

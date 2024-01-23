@@ -28,59 +28,76 @@ func TestHandleCalculateTotalPopulation(t *testing.T) {
 		},
 	})
 
-	tests := []struct {
-		name         string
+	type args struct {
 		buildReqBody func() string
-		wantCode     int
-		wantBody     string
-		wantErr      bool
+	}
+	type want struct {
+		respCode int
+		body     string
+	}
+	tests := []struct {
+		name string
+		args args
+		want want
 	}{
 		{
 			name: "Happy Path",
-			buildReqBody: func() string {
-				states := request.SumPopulationByState{
-					States: []domain.State{
-						{
-							Name:       "California",
-							Population: 38940231,
+			args: args{
+				buildReqBody: func() string {
+					states := request.SumPopulationByState{
+						States: []domain.State{
+							{
+								Name:       "California",
+								Population: 38940231,
+							},
+							{
+								Name:       "Texas",
+								Population: 29145505,
+							},
 						},
-						{
-							Name:       "Texas",
-							Population: 29145505,
-						},
-					},
-				}
+					}
 
-				body, err := json.Marshal(states)
-				require.NoError(t, err)
+					body, err := json.Marshal(states)
+					require.NoError(t, err)
 
-				return string(body)
+					return string(body)
+				},
 			},
-			wantCode: http.StatusOK,
-			wantBody: fmt.Sprintf("{\"total_population\":%v}", expectedTotalPopulation),
+			want: want{
+				respCode: http.StatusOK,
+				body:     fmt.Sprintf("{\"total_population\":%v}", expectedTotalPopulation),
+			},
 		},
 		{
 			name: "400 Bad Request - Invalid JSON",
-			buildReqBody: func() string {
-				return "["
+			args: args{
+				buildReqBody: func() string {
+					return "["
+				},
 			},
-			wantCode: http.StatusBadRequest,
-			wantBody: `{"status":400,"error":"unexpected EOF"}`,
+			want: want{
+				respCode: http.StatusBadRequest,
+				body:     `{"status":400,"error":"unexpected EOF"}`,
+			},
 		},
 		{
 			name: "400 Bad Request - Missing required values",
-			buildReqBody: func() string {
-				return `{"states": [{"population": 123}]}`
+			args: args{
+				buildReqBody: func() string {
+					return `{"states": [{"population": 123}]}`
+				},
 			},
-			wantCode: http.StatusBadRequest,
-			wantBody: `{"status":400,"error":"Key: 'SumPopulationByState.States[0].Name' Error:Field validation for 'Name' failed on the 'required' tag"}`,
+			want: want{
+				respCode: http.StatusBadRequest,
+				body:     `{"status":400,"error":"Key: 'SumPopulationByState.States[0].Name' Error:Field validation for 'Name' failed on the 'required' tag"}`,
+			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a New Request.
-			body := tt.buildReqBody()
+			body := tt.args.buildReqBody()
 			req, err := http.NewRequest("POST", "/api/v1/countries/sum-population-by-state", strings.NewReader(body))
 			require.NoError(t, err)
 
@@ -88,8 +105,8 @@ func TestHandleCalculateTotalPopulation(t *testing.T) {
 			response := executeRequest(req, s)
 
 			// Check the response code and body.
-			assert.Equal(t, tt.wantCode, response.Code)
-			assert.Equal(t, tt.wantBody, response.Body.String())
+			assert.Equal(t, tt.want.respCode, response.Code)
+			assert.Equal(t, tt.want.body, strings.TrimSpace(response.Body.String()))
 		})
 	}
 }

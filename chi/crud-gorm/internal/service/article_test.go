@@ -10,14 +10,27 @@ import (
 	"github.com/yizeng/gab/chi/crud-gorm/internal/repository"
 )
 
-func TestArticleService_CreateArticle(t *testing.T) {
-	testArticle := &domain.Article{
-		UserID:  999,
-		Title:   "title 999",
-		Content: "content 999",
+var (
+	testArticleFoo = domain.Article{
+		ID:      1,
+		UserID:  123,
+		Title:   "title foo",
+		Content: "content foo",
 	}
-	testErr := errors.New("something happened")
+	testArticleBar = domain.Article{
+		ID:      2,
+		UserID:  123,
+		Title:   "title bar",
+		Content: "content bar",
+	}
+	testArticles = []domain.Article{
+		testArticleFoo,
+		testArticleBar,
+	}
+	testErr = errors.New("something happened")
+)
 
+func TestArticleService_CreateArticle(t *testing.T) {
 	type fields struct {
 		repo ArticleRepository
 	}
@@ -44,9 +57,9 @@ func TestArticleService_CreateArticle(t *testing.T) {
 			},
 			args: args{
 				ctx:     context.TODO(),
-				article: testArticle,
+				article: &testArticleFoo,
 			},
-			want:       testArticle,
+			want:       &testArticleFoo,
 			wantErr:    false,
 			wantErrMsg: "",
 		},
@@ -61,7 +74,7 @@ func TestArticleService_CreateArticle(t *testing.T) {
 			},
 			args: args{
 				ctx:     context.TODO(),
-				article: testArticle,
+				article: &testArticleFoo,
 			},
 			want:       nil,
 			wantErr:    true,
@@ -90,13 +103,6 @@ func TestArticleService_CreateArticle(t *testing.T) {
 }
 
 func TestArticleService_GetArticle(t *testing.T) {
-	testArticle := &domain.Article{
-		UserID:  999,
-		Title:   "title 999",
-		Content: "content 999",
-	}
-	testErr := errors.New("something happened")
-
 	type fields struct {
 		repo ArticleRepository
 	}
@@ -117,7 +123,7 @@ func TestArticleService_GetArticle(t *testing.T) {
 			fields: fields{
 				repo: &repository.ArticleRepositoryMock{
 					MockFindByID: func(ctx context.Context, id uint) (*domain.Article, error) {
-						return testArticle, nil
+						return &testArticleFoo, nil
 					},
 				},
 			},
@@ -125,7 +131,7 @@ func TestArticleService_GetArticle(t *testing.T) {
 				ctx: context.TODO(),
 				id:  999,
 			},
-			want:       testArticle,
+			want:       &testArticleFoo,
 			wantErr:    false,
 			wantErrMsg: "",
 		},
@@ -140,7 +146,7 @@ func TestArticleService_GetArticle(t *testing.T) {
 			},
 			args: args{
 				ctx: context.TODO(),
-				id:  testArticle.ID,
+				id:  testArticleFoo.ID,
 			},
 			want:       nil,
 			wantErr:    true,
@@ -169,20 +175,6 @@ func TestArticleService_GetArticle(t *testing.T) {
 }
 
 func TestArticleService_ListArticles(t *testing.T) {
-	testArticles := []domain.Article{
-		{
-			UserID:  999,
-			Title:   "title 999",
-			Content: "content 999",
-		},
-		{
-			UserID:  888,
-			Title:   "title 888",
-			Content: "content 888",
-		},
-	}
-	testErr := errors.New("something happened")
-
 	type fields struct {
 		repo ArticleRepository
 	}
@@ -258,21 +250,13 @@ func TestArticleService_ListArticles(t *testing.T) {
 }
 
 func TestArticleService_SearchArticles(t *testing.T) {
-	testArticles := []domain.Article{
-		{
-			UserID:  999,
-			Title:   "title 999",
-			Content: "content 999",
-		},
-	}
-	testErr := errors.New("something happened")
-
 	type fields struct {
 		repo ArticleRepository
 	}
 	type args struct {
-		ctx      context.Context
-		articles []domain.Article
+		ctx     context.Context
+		title   string
+		content string
 	}
 	tests := []struct {
 		name       string
@@ -292,8 +276,9 @@ func TestArticleService_SearchArticles(t *testing.T) {
 				},
 			},
 			args: args{
-				ctx:      context.TODO(),
-				articles: testArticles,
+				ctx:     context.TODO(),
+				title:   "test title",
+				content: "test content",
 			},
 			want:       testArticles,
 			wantErr:    false,
@@ -309,8 +294,9 @@ func TestArticleService_SearchArticles(t *testing.T) {
 				},
 			},
 			args: args{
-				ctx:      context.TODO(),
-				articles: testArticles,
+				ctx:     context.TODO(),
+				title:   "test title",
+				content: "test content",
 			},
 			want:       nil,
 			wantErr:    true,
