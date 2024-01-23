@@ -62,10 +62,12 @@ func (d *ArticleDAO) FindByID(ctx context.Context, id uint) (*Article, error) {
 	return &article, nil
 }
 
-func (d *ArticleDAO) FindAll(ctx context.Context) ([]Article, error) {
+func (d *ArticleDAO) FindAll(ctx context.Context, page, perPage uint) ([]Article, error) {
 	var articles []Article
 
-	result := d.db.WithContext(ctx).Find(&articles)
+	// page number is starting from 1.
+	offset := (page - 1) * perPage
+	result := d.db.WithContext(ctx).Offset(int(offset)).Limit(int(perPage)).Find(&articles)
 	if result.Error != nil {
 		return nil, result.Error
 	}

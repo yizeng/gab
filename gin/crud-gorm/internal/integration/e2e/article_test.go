@@ -289,6 +289,7 @@ func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleListArticles() {
 	tests := []struct {
 		name     string
 		setup    func()
+		query    string
 		respCode int
 		want     []domain.Article
 		wantErr  bool
@@ -297,6 +298,7 @@ func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleListArticles() {
 		{
 			name:     "200 OK",
 			setup:    func() {},
+			query:    "",
 			respCode: http.StatusOK,
 			wantErr:  false,
 			err:      nil,
@@ -315,13 +317,66 @@ func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleListArticles() {
 			},
 		},
 		{
+			name:     "200 OK - With pagination",
+			setup:    func() {},
+			query:    "?page=2&per_page=1",
+			respCode: http.StatusOK,
+			wantErr:  false,
+			err:      nil,
+			want: []domain.Article{
+				{
+					ID:      888,
+					UserID:  123,
+					Title:   "seeded title 888",
+					Content: "seeded content 888",
+				},
+			},
+		},
+		{
 			name: "200 OK - When there are no articles",
 			setup: func() {
 				s.deleteAllArticles()
 			},
+			query:    "?page=1&per_page=2",
 			respCode: http.StatusOK,
 			wantErr:  false,
 			err:      nil,
+			want:     []domain.Article{},
+		},
+		{
+			name:     "400 Bad Request - Invalid page query",
+			setup:    func() {},
+			query:    "?page=abc&per_page=2",
+			respCode: http.StatusBadRequest,
+			wantErr:  true,
+			err:      response.NewInvalidInput("page", "abc"),
+			want:     []domain.Article{},
+		},
+		{
+			name:     "400 Bad Request - Negative page query",
+			setup:    func() {},
+			query:    "?page=-123&per_page=2",
+			respCode: http.StatusBadRequest,
+			wantErr:  true,
+			err:      response.NewInvalidInput("page", "-123"),
+			want:     []domain.Article{},
+		},
+		{
+			name:     "400 Bad Request - Invalid per_page query",
+			setup:    func() {},
+			query:    "?page=1&per_page=abc",
+			respCode: http.StatusBadRequest,
+			wantErr:  true,
+			err:      response.NewInvalidInput("per_page", "abc"),
+			want:     []domain.Article{},
+		},
+		{
+			name:     "400 Bad Request - Negative per_page query",
+			setup:    func() {},
+			query:    "?page=1&per_page=-123",
+			respCode: http.StatusBadRequest,
+			wantErr:  true,
+			err:      response.NewInvalidInput("per_page", "-123"),
 			want:     []domain.Article{},
 		},
 	}
@@ -331,7 +386,7 @@ func (s *ArticleHandlersTestSuite) TestArticleHandlers_HandleListArticles() {
 			tt.setup()
 
 			// Prepare Request.
-			req, err := http.NewRequest("GET", "/api/v1/articles", nil)
+			req, err := http.NewRequest("GET", "/api/v1/articles"+tt.query, nil)
 			require.NoError(t, err)
 
 			// Execute Request.
