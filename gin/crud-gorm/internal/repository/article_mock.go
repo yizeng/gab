@@ -9,7 +9,7 @@ import (
 type ArticleRepositoryMock struct {
 	MockCreate   func(ctx context.Context, article *domain.Article) (*domain.Article, error)
 	MockFindByID func(ctx context.Context, id uint) (*domain.Article, error)
-	MockFindAll  func(ctx context.Context) ([]domain.Article, error)
+	MockFindAll  func(ctx context.Context, page, perPage uint) ([]domain.Article, error)
 	MockSearch   func(ctx context.Context, title, content string) ([]domain.Article, error)
 }
 
@@ -21,8 +21,8 @@ func (m *ArticleRepositoryMock) FindByID(ctx context.Context, id uint) (*domain.
 	return m.MockFindByID(ctx, id)
 }
 
-func (m *ArticleRepositoryMock) FindAll(ctx context.Context) ([]domain.Article, error) {
-	return m.MockFindAll(ctx)
+func (m *ArticleRepositoryMock) FindAll(ctx context.Context, page, perPage uint) ([]domain.Article, error) {
+	return m.MockFindAll(ctx, page, perPage)
 }
 
 func (m *ArticleRepositoryMock) Search(ctx context.Context, title, content string) ([]domain.Article, error) {

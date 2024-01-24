@@ -10,5 +10,5 @@ func RenderError(ctx *gin.Context, e *ErrResponse) {
 		zap.L().Error(e.StackErr.Error())
 	}
 
-	ctx.JSON(e.StatusCode, e)
+	ctx.AbortWithStatusJSON(e.StatusCode, e)
 }

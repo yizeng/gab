@@ -16,7 +16,7 @@ var (
 type ArticleDAO interface {
 	Create(ctx context.Context, article *dao.Article) (*dao.Article, error)
 	FindByID(ctx context.Context, id uint) (*dao.Article, error)
-	FindAll(ctx context.Context) ([]dao.Article, error)
+	FindAll(ctx context.Context, page, perPage uint) ([]dao.Article, error)
 	Search(ctx context.Context, title, content string) ([]dao.Article, error)
 }
 
@@ -54,8 +54,8 @@ func (r *ArticleRepository) FindByID(ctx context.Context, id uint) (*domain.Arti
 	return daoToDomain(found), nil
 }
 
-func (r *ArticleRepository) FindAll(ctx context.Context) ([]domain.Article, error) {
-	allArticles, err := r.dao.FindAll(ctx)
+func (r *ArticleRepository) FindAll(ctx context.Context, page, perPage uint) ([]domain.Article, error) {
+	allArticles, err := r.dao.FindAll(ctx, page, perPage)
 	if err != nil {
 		return nil, fmt.Errorf("r.dao.FindAll -> %w", err)
 	}

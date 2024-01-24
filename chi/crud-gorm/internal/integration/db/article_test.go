@@ -89,13 +89,21 @@ func (s *ArticleDBTestSuite) TestArticleDB_FindByID() {
 }
 
 func (s *ArticleDBTestSuite) TestArticleDB_FindAll() {
-	result, err := s.repo.FindAll(context.TODO())
+	result, err := s.repo.FindAll(context.TODO(), 1, 10)
 	assert.NoError(s.T(), err)
 
 	assert.Equal(s.T(), 2, len(result))
 	assert.EqualValues(s.T(), 123, result[0].UserID)
 	assert.Equal(s.T(), "seeded title 999", result[0].Title)
 	assert.Equal(s.T(), "seeded content 999", result[0].Content)
+
+	result, err = s.repo.FindAll(context.TODO(), 2, 1)
+	assert.NoError(s.T(), err)
+
+	assert.Equal(s.T(), 1, len(result))
+	assert.EqualValues(s.T(), 123, result[0].UserID)
+	assert.Equal(s.T(), "seeded title 888", result[0].Title)
+	assert.Equal(s.T(), "seeded content 888", result[0].Content)
 }
 
 func (s *ArticleDBTestSuite) TestArticleDB_Create() {

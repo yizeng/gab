@@ -11,6 +11,7 @@ import (
 
 	"github.com/yizeng/gab/gin/crud-gorm/internal/api/handler/v1/request"
 	"github.com/yizeng/gab/gin/crud-gorm/internal/api/handler/v1/response"
+	"github.com/yizeng/gab/gin/crud-gorm/internal/api/middleware"
 	"github.com/yizeng/gab/gin/crud-gorm/internal/domain"
 	"github.com/yizeng/gab/gin/crud-gorm/internal/service"
 )
@@ -18,7 +19,7 @@ import (
 type ArticleService interface {
 	CreateArticle(ctx context.Context, article *domain.Article) (*domain.Article, error)
 	GetArticle(ctx context.Context, id uint) (*domain.Article, error)
-	ListArticles(ctx context.Context) ([]domain.Article, error)
+	ListArticles(ctx context.Context, page, perPage uint) ([]domain.Article, error)
 	SearchArticles(ctx context.Context, title, content string) ([]domain.Article, error)
 }
 
@@ -122,11 +123,26 @@ func (h *ArticleHandler) HandleGetArticle(ctx *gin.Context) {
 // @Summary      List all articles
 // @Tags         articles
 // @Produce      json
+// @Param        page     query      int  false  "which page to load. Default to 1 if empty."
+// @Param        per_page query      int  false  "how many items per page. Default to 10 if empty."
 // @Success      200      {object}   []domain.Article
 // @Failure      500      {object}   response.ErrResponse
 // @Router       /articles [get]
 func (h *ArticleHandler) HandleListArticles(ctx *gin.Context) {
-	articles, err := h.svc.ListArticles(ctx.Request.Context())
+	page, err := parsePaginationQuery(ctx, middleware.PageQueryKey)
+	if err != nil {
+		response.RenderError(ctx, response.NewInternalServerError(err))
+
+		return
+	}
+	perPage, err := parsePaginationQuery(ctx, middleware.PerPageQueryKey)
+	if err != nil {
+		response.RenderError(ctx, response.NewInternalServerError(err))
+
+		return
+	}
+
+	articles, err := h.svc.ListArticles(ctx.Request.Context(), page, perPage)
 	if err != nil {
 		err = fmt.Errorf("v1.HandleListArticles -> h.svc.ListArticles -> %w", err)
 		response.RenderError(ctx, response.NewInternalServerError(err))
@@ -159,4 +175,18 @@ func (h *ArticleHandler) HandleSearchArticles(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, articles)
+}
+
+func parsePaginationQuery(ctx *gin.Context, key string) (uint, error) {
+	val, exists := ctx.Get(key)
+	if !exists {
+		return 0, fmt.Errorf("key %q is not found in context", key)
+	}
+
+	result, ok := val.(uint)
+	if !ok {
+		return 0, fmt.Errorf("key %q's value %v cannot be casted into uint", key, val)
+	}
+
+	return result, nil
 }

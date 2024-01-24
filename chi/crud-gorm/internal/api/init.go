@@ -68,7 +68,7 @@ func (s *Server) MountHandlers(articleHandler *v1.ArticleHandler) {
 
 	apiV1Router := chi.NewRouter()
 	apiV1Router.Route("/", func(r chi.Router) {
-		r.Get("/articles", articleHandler.HandleListArticles)
+		r.With(middleware.Pagination).Get("/articles", articleHandler.HandleListArticles)
 		r.Post("/articles", articleHandler.HandleCreateArticle)
 		r.Get("/articles/{articleID}", articleHandler.HandleGetArticle)
 		r.Get("/articles/search", articleHandler.HandleSearchArticles)

@@ -16,6 +16,7 @@ import (
 
 	"github.com/yizeng/gab/gin/crud-gorm/internal/api/handler/v1/request"
 	"github.com/yizeng/gab/gin/crud-gorm/internal/api/handler/v1/response"
+	"github.com/yizeng/gab/gin/crud-gorm/internal/api/middleware"
 	"github.com/yizeng/gab/gin/crud-gorm/internal/domain"
 	"github.com/yizeng/gab/gin/crud-gorm/internal/service"
 )
@@ -257,7 +258,7 @@ func TestArticleHandler_HandleListArticles(t *testing.T) {
 			name: "200 OK",
 			setupService: func() ArticleService {
 				mock := service.NewArticleServiceMock()
-				mock.MockListArticles = func(ctx context.Context) ([]domain.Article, error) {
+				mock.MockListArticles = func(ctx context.Context, page, perPage uint) ([]domain.Article, error) {
 					return testArticles, nil
 				}
 				return mock
@@ -271,7 +272,7 @@ func TestArticleHandler_HandleListArticles(t *testing.T) {
 			name: "500 Internal Server Error - When service returns an error",
 			setupService: func() ArticleService {
 				mock := service.NewArticleServiceMock()
-				mock.MockListArticles = func(ctx context.Context) ([]domain.Article, error) {
+				mock.MockListArticles = func(ctx context.Context, page, perPage uint) ([]domain.Article, error) {
 					return nil, testError
 				}
 				return mock
@@ -291,7 +292,7 @@ func TestArticleHandler_HandleListArticles(t *testing.T) {
 			// Create router and attach handler.
 			gin.SetMode(gin.TestMode)
 			r := gin.Default()
-			r.GET("/", h.HandleListArticles)
+			r.GET("/", middleware.Paginate(), h.HandleListArticles)
 
 			// Prepare request.
 			req, err := http.NewRequest(http.MethodGet, "/", nil)
@@ -327,6 +328,37 @@ func TestArticleHandler_HandleListArticles(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestArticleHandler_HandleListArticles_NotUsingPaginationMiddleware(t *testing.T) {
+	// Prepare handler.
+	svc := service.NewArticleServiceMock()
+	h := NewArticleHandler(svc)
+
+	// Create router and attach handler.
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	r.GET("/", h.HandleListArticles) // Without loading pagination middleware.
+
+	// Prepare request.
+	req, err := http.NewRequest(http.MethodGet, "/", nil)
+	require.NoError(t, err)
+
+	// Execute request.
+	resp := httptest.NewRecorder()
+	r.ServeHTTP(resp, req)
+
+	// Check the response code.
+	assert.Equal(t, http.StatusInternalServerError, resp.Code)
+
+	var result response.ErrResponse
+	err = json.Unmarshal(resp.Body.Bytes(), &result)
+	assert.NoError(t, err)
+
+	want := response.NewInternalServerError(errors.New("something went wrong"))
+	assert.Equal(t, want.StatusCode, result.StatusCode)
+	assert.Equal(t, want.ErrorMsg, result.ErrorMsg)
+	assert.Equal(t, want.ErrorCode, result.ErrorCode)
 }
 
 func TestArticleHandler_HandleSearchArticles(t *testing.T) {
