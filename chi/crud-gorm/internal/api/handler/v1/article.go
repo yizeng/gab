@@ -135,8 +135,22 @@ func (h *ArticleHandler) HandleGetArticle(w http.ResponseWriter, r *http.Request
 // @Failure      500      {object}   response.ErrResponse
 // @Router       /articles [get]
 func (h *ArticleHandler) HandleListArticles(w http.ResponseWriter, r *http.Request) {
-	page := r.Context().Value(middleware.PageQueryKey).(uint)
-	perPage := r.Context().Value(middleware.PerPageQueryKey).(uint)
+	pageVal := r.Context().Value(middleware.PageQueryKey)
+	page, ok := pageVal.(uint)
+	if !ok {
+		err := fmt.Errorf("key %q's value %v cannot be casted into uint", middleware.PageQueryKey, pageVal)
+		render.Render(w, r, response.NewInternalServerError(err))
+
+		return
+	}
+	perPageVal := r.Context().Value(middleware.PerPageQueryKey)
+	perPage, ok := perPageVal.(uint)
+	if !ok {
+		err := fmt.Errorf("key %q's value %v cannot be casted into uint", middleware.PerPageQueryKey, perPage)
+		render.Render(w, r, response.NewInternalServerError(err))
+
+		return
+	}
 
 	articles, err := h.svc.ListArticles(r.Context(), page, perPage)
 	if err != nil {

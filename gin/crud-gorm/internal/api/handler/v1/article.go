@@ -129,10 +129,20 @@ func (h *ArticleHandler) HandleGetArticle(ctx *gin.Context) {
 // @Failure      500      {object}   response.ErrResponse
 // @Router       /articles [get]
 func (h *ArticleHandler) HandleListArticles(ctx *gin.Context) {
-	page, _ := ctx.Get(middleware.PageQueryKey)
-	perPage, _ := ctx.Get(middleware.PerPageQueryKey)
+	page, err := parsePaginationQuery(ctx, middleware.PageQueryKey)
+	if err != nil {
+		response.RenderError(ctx, response.NewInternalServerError(err))
 
-	articles, err := h.svc.ListArticles(ctx.Request.Context(), page.(uint), perPage.(uint))
+		return
+	}
+	perPage, err := parsePaginationQuery(ctx, middleware.PerPageQueryKey)
+	if err != nil {
+		response.RenderError(ctx, response.NewInternalServerError(err))
+
+		return
+	}
+
+	articles, err := h.svc.ListArticles(ctx.Request.Context(), page, perPage)
 	if err != nil {
 		err = fmt.Errorf("v1.HandleListArticles -> h.svc.ListArticles -> %w", err)
 		response.RenderError(ctx, response.NewInternalServerError(err))
@@ -165,4 +175,18 @@ func (h *ArticleHandler) HandleSearchArticles(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, articles)
+}
+
+func parsePaginationQuery(ctx *gin.Context, key string) (uint, error) {
+	val, exists := ctx.Get(key)
+	if !exists {
+		return 0, fmt.Errorf("key %q is not found in context", key)
+	}
+
+	result, ok := val.(uint)
+	if !ok {
+		return 0, fmt.Errorf("key %q's value %v cannot be casted into uint", key, val)
+	}
+
+	return result, nil
 }
