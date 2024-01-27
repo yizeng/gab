@@ -33,33 +33,33 @@ func NewArticleDAO(db *gorm.DB) *ArticleDAO {
 	}
 }
 
-func (d *ArticleDAO) Create(ctx context.Context, article *Article) (*Article, error) {
-	result := d.db.WithContext(ctx).Create(article)
+func (d *ArticleDAO) Insert(ctx context.Context, article Article) (Article, error) {
+	result := d.db.WithContext(ctx).Create(&article)
 	if result.Error != nil {
 		var err *pgconn.PgError
 		if errors.As(result.Error, &err) && err.Code == pgerrcode.UniqueViolation {
-			return nil, ErrArticleDuplicated
+			return Article{}, ErrArticleDuplicated
 		}
 
-		return nil, result.Error
+		return Article{}, result.Error
 	}
 
 	return article, nil
 }
 
-func (d *ArticleDAO) FindByID(ctx context.Context, id uint) (*Article, error) {
+func (d *ArticleDAO) FindByID(ctx context.Context, id uint) (Article, error) {
 	var article Article
 
 	result := d.db.WithContext(ctx).First(&article, id)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, ErrArticleNotFound
+			return Article{}, ErrArticleNotFound
 		}
 
-		return nil, result.Error
+		return Article{}, result.Error
 	}
 
-	return &article, nil
+	return article, nil
 }
 
 func (d *ArticleDAO) FindAll(ctx context.Context, page, perPage uint) ([]Article, error) {

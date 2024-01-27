@@ -14,8 +14,8 @@ var (
 )
 
 type ArticleDAO interface {
-	Create(ctx context.Context, article *dao.Article) (*dao.Article, error)
-	FindByID(ctx context.Context, id uint) (*dao.Article, error)
+	Insert(ctx context.Context, article dao.Article) (dao.Article, error)
+	FindByID(ctx context.Context, id uint) (dao.Article, error)
 	FindAll(ctx context.Context, page, perPage uint) ([]dao.Article, error)
 	Search(ctx context.Context, title, content string) ([]dao.Article, error)
 }
@@ -30,25 +30,23 @@ func NewArticleRepository(dao ArticleDAO) *ArticleRepository {
 	}
 }
 
-func (r *ArticleRepository) Create(ctx context.Context, article *domain.Article) (*domain.Article, error) {
-	articleDAO := &dao.Article{
+func (r *ArticleRepository) Create(ctx context.Context, article domain.Article) (domain.Article, error) {
+	created, err := r.dao.Insert(ctx, dao.Article{
 		UserID:  article.UserID,
 		Title:   article.Title,
 		Content: article.Content,
-	}
-
-	created, err := r.dao.Create(ctx, articleDAO)
+	})
 	if err != nil {
-		return nil, fmt.Errorf("r.dao.Create -> %w", err)
+		return domain.Article{}, fmt.Errorf("r.dao.Insert -> %w", err)
 	}
 
 	return daoToDomain(created), nil
 }
 
-func (r *ArticleRepository) FindByID(ctx context.Context, id uint) (*domain.Article, error) {
+func (r *ArticleRepository) FindByID(ctx context.Context, id uint) (domain.Article, error) {
 	found, err := r.dao.FindByID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("r.dao.FindByID -> %w", err)
+		return domain.Article{}, fmt.Errorf("r.dao.FindByID -> %w", err)
 	}
 
 	return daoToDomain(found), nil
@@ -62,7 +60,7 @@ func (r *ArticleRepository) FindAll(ctx context.Context, page, perPage uint) ([]
 
 	articles := make([]domain.Article, 0, len(allArticles))
 	for _, a := range allArticles {
-		articles = append(articles, *daoToDomain(&a))
+		articles = append(articles, daoToDomain(a))
 	}
 
 	return articles, nil
@@ -76,14 +74,14 @@ func (r *ArticleRepository) Search(ctx context.Context, title, content string) (
 
 	articles := make([]domain.Article, 0, len(allArticles))
 	for _, a := range allArticles {
-		articles = append(articles, *daoToDomain(&a))
+		articles = append(articles, daoToDomain(a))
 	}
 
 	return articles, nil
 }
 
-func daoToDomain(a *dao.Article) *domain.Article {
-	return &domain.Article{
+func daoToDomain(a dao.Article) domain.Article {
+	return domain.Article{
 		ID:        a.ID,
 		UserID:    a.UserID,
 		Title:     a.Title,
