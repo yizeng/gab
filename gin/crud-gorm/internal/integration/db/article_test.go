@@ -107,7 +107,7 @@ func (s *ArticleDBTestSuite) TestArticleDB_FindAll() {
 }
 
 func (s *ArticleDBTestSuite) TestArticleDB_Create() {
-	result, err := s.repo.Create(context.TODO(), &domain.Article{
+	result, err := s.repo.Create(context.TODO(), domain.Article{
 		UserID:  123,
 		Title:   "new title",
 		Content: "new content",

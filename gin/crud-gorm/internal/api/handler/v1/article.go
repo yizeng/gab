@@ -17,8 +17,8 @@ import (
 )
 
 type ArticleService interface {
-	CreateArticle(ctx context.Context, article *domain.Article) (*domain.Article, error)
-	GetArticle(ctx context.Context, id uint) (*domain.Article, error)
+	CreateArticle(ctx context.Context, article domain.Article) (domain.Article, error)
+	GetArticle(ctx context.Context, id uint) (domain.Article, error)
 	ListArticles(ctx context.Context, page, perPage uint) ([]domain.Article, error)
 	SearchArticles(ctx context.Context, title, content string) ([]domain.Article, error)
 }
@@ -56,7 +56,7 @@ func (h *ArticleHandler) HandleCreateArticle(ctx *gin.Context) {
 		return
 	}
 
-	article, err := h.svc.CreateArticle(ctx.Request.Context(), &domain.Article{
+	article, err := h.svc.CreateArticle(ctx.Request.Context(), domain.Article{
 		UserID:  req.UserID,
 		Title:   req.Title,
 		Content: req.Content,

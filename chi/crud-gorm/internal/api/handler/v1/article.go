@@ -18,8 +18,8 @@ import (
 )
 
 type ArticleService interface {
-	CreateArticle(ctx context.Context, article *domain.Article) (*domain.Article, error)
-	GetArticle(ctx context.Context, id uint) (*domain.Article, error)
+	CreateArticle(ctx context.Context, article domain.Article) (domain.Article, error)
+	GetArticle(ctx context.Context, id uint) (domain.Article, error)
 	ListArticles(ctx context.Context, page uint, perPage uint) ([]domain.Article, error)
 	SearchArticles(ctx context.Context, title, content string) ([]domain.Article, error)
 }
@@ -51,7 +51,7 @@ func (h *ArticleHandler) HandleCreateArticle(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	article, err := h.svc.CreateArticle(r.Context(), &domain.Article{
+	article, err := h.svc.CreateArticle(r.Context(), domain.Article{
 		UserID:  req.UserID,
 		Title:   req.Title,
 		Content: req.Content,
@@ -70,7 +70,7 @@ func (h *ArticleHandler) HandleCreateArticle(w http.ResponseWriter, r *http.Requ
 	}
 
 	render.Status(r, http.StatusCreated)
-	err = render.Render(w, r, response.NewArticle(article))
+	err = render.Render(w, r, response.NewArticle(&article))
 	if err != nil {
 		_ = render.Render(w, r, response.NewInternalServerError(err))
 
@@ -117,7 +117,7 @@ func (h *ArticleHandler) HandleGetArticle(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = render.Render(w, r, response.NewArticle(article))
+	err = render.Render(w, r, response.NewArticle(&article))
 	if err != nil {
 		_ = render.Render(w, r, response.NewInternalServerError(err))
 

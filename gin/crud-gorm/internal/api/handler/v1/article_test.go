@@ -48,7 +48,7 @@ func TestArticleHandler_HandleCreateArticle(t *testing.T) {
 		buildReqBody func() string
 	}
 	type want struct {
-		article  *domain.Article
+		article  domain.Article
 		respCode int
 		err      *response.ErrResponse
 	}
@@ -64,8 +64,8 @@ func TestArticleHandler_HandleCreateArticle(t *testing.T) {
 			fields: fields{
 				setupService: func() ArticleService {
 					mock := service.NewArticleServiceMock()
-					mock.MockCreate = func(ctx context.Context, article *domain.Article) (*domain.Article, error) {
-						return &testArticleFoo, nil
+					mock.MockCreate = func(ctx context.Context, article domain.Article) (domain.Article, error) {
+						return testArticleFoo, nil
 					}
 					return mock
 				},
@@ -86,7 +86,7 @@ func TestArticleHandler_HandleCreateArticle(t *testing.T) {
 			},
 			want: want{
 				respCode: http.StatusCreated,
-				article:  &testArticleFoo,
+				article:  testArticleFoo,
 				err:      nil,
 			},
 			wantErr: false,
@@ -96,8 +96,8 @@ func TestArticleHandler_HandleCreateArticle(t *testing.T) {
 			fields: fields{
 				setupService: func() ArticleService {
 					mock := service.NewArticleServiceMock()
-					mock.MockCreate = func(ctx context.Context, article *domain.Article) (*domain.Article, error) {
-						return nil, testErr
+					mock.MockCreate = func(ctx context.Context, article domain.Article) (domain.Article, error) {
+						return domain.Article{}, testErr
 					}
 					return mock
 				},
@@ -117,7 +117,7 @@ func TestArticleHandler_HandleCreateArticle(t *testing.T) {
 				},
 			},
 			want: want{
-				article:  nil,
+				article:  domain.Article{},
 				respCode: http.StatusInternalServerError,
 				err:      response.NewInternalServerError(testErr),
 			},
@@ -177,7 +177,7 @@ func TestArticleHandler_HandleGetArticle(t *testing.T) {
 		articleID string
 	}
 	type want struct {
-		article  *domain.Article
+		article  domain.Article
 		respCode int
 		err      *response.ErrResponse
 	}
@@ -193,8 +193,8 @@ func TestArticleHandler_HandleGetArticle(t *testing.T) {
 			fields: fields{
 				setupService: func() ArticleService {
 					mock := service.NewArticleServiceMock()
-					mock.MockGetArticle = func(ctx context.Context, id uint) (*domain.Article, error) {
-						return &testArticleFoo, nil
+					mock.MockGetArticle = func(ctx context.Context, id uint) (domain.Article, error) {
+						return testArticleFoo, nil
 					}
 					return mock
 				},
@@ -203,7 +203,7 @@ func TestArticleHandler_HandleGetArticle(t *testing.T) {
 				articleID: "999",
 			},
 			want: want{
-				article:  &testArticleFoo,
+				article:  testArticleFoo,
 				respCode: http.StatusOK,
 				err:      nil,
 			},
@@ -213,8 +213,8 @@ func TestArticleHandler_HandleGetArticle(t *testing.T) {
 			fields: fields{
 				setupService: func() ArticleService {
 					mock := service.NewArticleServiceMock()
-					mock.MockGetArticle = func(ctx context.Context, id uint) (*domain.Article, error) {
-						return nil, testErr
+					mock.MockGetArticle = func(ctx context.Context, id uint) (domain.Article, error) {
+						return domain.Article{}, testErr
 					}
 					return mock
 				},
@@ -223,7 +223,7 @@ func TestArticleHandler_HandleGetArticle(t *testing.T) {
 				articleID: "999",
 			},
 			want: want{
-				article:  nil,
+				article:  domain.Article{},
 				respCode: http.StatusInternalServerError,
 				err:      response.NewInternalServerError(testErr),
 			},
