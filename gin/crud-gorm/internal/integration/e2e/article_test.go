@@ -109,7 +109,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 		buildReqBody func() string
 	}
 	type want struct {
-		article  *domain.Article
+		article  domain.Article
 		respCode int
 		err      *response.ErrResponse
 	}
@@ -136,7 +136,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 				},
 			},
 			want: want{
-				article: &domain.Article{
+				article: domain.Article{
 					UserID:  123,
 					Title:   "title 1",
 					Content: "content 1",
@@ -162,7 +162,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 				},
 			},
 			want: want{
-				article:  nil,
+				article:  domain.Article{},
 				respCode: http.StatusBadRequest,
 				err:      response.NewBadRequest("content: the length must be between 1 and 5000; title: the length must be between 1 and 128; user_id: cannot be blank."),
 			},
@@ -176,7 +176,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 				},
 			},
 			want: want{
-				article:  nil,
+				article:  domain.Article{},
 				respCode: http.StatusBadRequest,
 				err:      response.NewBadRequest("unexpected EOF"),
 			},
@@ -199,7 +199,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 				},
 			},
 			want: want{
-				article:  nil,
+				article:  domain.Article{},
 				respCode: http.StatusBadRequest,
 				err:      response.NewBadRequest("article already exists"),
 			},
@@ -245,7 +245,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 		articleID string
 	}
 	type want struct {
-		article  *domain.Article
+		article  domain.Article
 		respCode int
 		err      *response.ErrResponse
 	}
@@ -261,7 +261,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 				articleID: "999",
 			},
 			want: want{
-				article:  &testArticle999,
+				article:  testArticle999,
 				respCode: http.StatusOK,
 				err:      nil,
 			},
@@ -273,7 +273,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 				articleID: "1",
 			},
 			want: want{
-				article:  nil,
+				article:  domain.Article{},
 				respCode: http.StatusNotFound,
 				err:      response.NewNotFound("article", "ID", "1"),
 			},
@@ -285,7 +285,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 				articleID: "-1",
 			},
 			want: want{
-				article:  nil,
+				article:  domain.Article{},
 				respCode: http.StatusNotFound,
 				err:      response.NewNotFound("article", "ID", "-1"),
 			},
@@ -297,7 +297,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 				articleID: "abc",
 			},
 			want: want{
-				article:  nil,
+				article:  domain.Article{},
 				respCode: http.StatusBadRequest,
 				err:      response.NewInvalidInput("articleID", "abc"),
 			},

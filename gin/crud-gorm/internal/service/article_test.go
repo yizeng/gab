@@ -36,13 +36,13 @@ func TestArticleService_CreateArticle(t *testing.T) {
 	}
 	type args struct {
 		ctx     context.Context
-		article *domain.Article
+		article domain.Article
 	}
 	tests := []struct {
 		name       string
 		fields     fields
 		args       args
-		want       *domain.Article
+		want       domain.Article
 		wantErr    bool
 		wantErrMsg string
 	}{
@@ -50,16 +50,16 @@ func TestArticleService_CreateArticle(t *testing.T) {
 			name: "Happy Path",
 			fields: fields{
 				repo: &repository.ArticleRepositoryMock{
-					MockCreate: func(ctx context.Context, article *domain.Article) (*domain.Article, error) {
+					MockCreate: func(ctx context.Context, article domain.Article) (domain.Article, error) {
 						return article, nil
 					},
 				},
 			},
 			args: args{
 				ctx:     context.TODO(),
-				article: &testArticleFoo,
+				article: testArticleFoo,
 			},
-			want:       &testArticleFoo,
+			want:       testArticleFoo,
 			wantErr:    false,
 			wantErrMsg: "",
 		},
@@ -67,16 +67,16 @@ func TestArticleService_CreateArticle(t *testing.T) {
 			name: "Error Path",
 			fields: fields{
 				repo: &repository.ArticleRepositoryMock{
-					MockCreate: func(ctx context.Context, article *domain.Article) (*domain.Article, error) {
-						return nil, testErr
+					MockCreate: func(ctx context.Context, article domain.Article) (domain.Article, error) {
+						return domain.Article{}, testErr
 					},
 				},
 			},
 			args: args{
 				ctx:     context.TODO(),
-				article: &testArticleFoo,
+				article: testArticleFoo,
 			},
-			want:       nil,
+			want:       domain.Article{},
 			wantErr:    true,
 			wantErrMsg: "s.repo.Create -> something happened",
 		},
@@ -114,7 +114,7 @@ func TestArticleService_GetArticle(t *testing.T) {
 		name       string
 		fields     fields
 		args       args
-		want       *domain.Article
+		want       domain.Article
 		wantErr    bool
 		wantErrMsg string
 	}{
@@ -122,8 +122,8 @@ func TestArticleService_GetArticle(t *testing.T) {
 			name: "Happy Path",
 			fields: fields{
 				repo: &repository.ArticleRepositoryMock{
-					MockFindByID: func(ctx context.Context, id uint) (*domain.Article, error) {
-						return &testArticleFoo, nil
+					MockFindByID: func(ctx context.Context, id uint) (domain.Article, error) {
+						return testArticleFoo, nil
 					},
 				},
 			},
@@ -131,7 +131,7 @@ func TestArticleService_GetArticle(t *testing.T) {
 				ctx: context.TODO(),
 				id:  999,
 			},
-			want:       &testArticleFoo,
+			want:       testArticleFoo,
 			wantErr:    false,
 			wantErrMsg: "",
 		},
@@ -139,8 +139,8 @@ func TestArticleService_GetArticle(t *testing.T) {
 			name: "Error Path",
 			fields: fields{
 				repo: &repository.ArticleRepositoryMock{
-					MockFindByID: func(ctx context.Context, id uint) (*domain.Article, error) {
-						return nil, testErr
+					MockFindByID: func(ctx context.Context, id uint) (domain.Article, error) {
+						return domain.Article{}, testErr
 					},
 				},
 			},
@@ -148,7 +148,7 @@ func TestArticleService_GetArticle(t *testing.T) {
 				ctx: context.TODO(),
 				id:  testArticleFoo.ID,
 			},
-			want:       nil,
+			want:       domain.Article{},
 			wantErr:    true,
 			wantErrMsg: "s.repo.FindByID -> something happened",
 		},

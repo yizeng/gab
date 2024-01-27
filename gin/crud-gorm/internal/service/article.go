@@ -14,8 +14,8 @@ var (
 )
 
 type ArticleRepository interface {
-	Create(ctx context.Context, article *domain.Article) (*domain.Article, error)
-	FindByID(ctx context.Context, id uint) (*domain.Article, error)
+	Create(ctx context.Context, article domain.Article) (domain.Article, error)
+	FindByID(ctx context.Context, id uint) (domain.Article, error)
 	FindAll(ctx context.Context, page, perPage uint) ([]domain.Article, error)
 	Search(ctx context.Context, title, content string) ([]domain.Article, error)
 }
@@ -30,19 +30,19 @@ func NewArticleService(repo ArticleRepository) *ArticleService {
 	}
 }
 
-func (s *ArticleService) CreateArticle(ctx context.Context, article *domain.Article) (*domain.Article, error) {
+func (s *ArticleService) CreateArticle(ctx context.Context, article domain.Article) (domain.Article, error) {
 	created, err := s.repo.Create(ctx, article)
 	if err != nil {
-		return nil, fmt.Errorf("s.repo.Create -> %w", err)
+		return domain.Article{}, fmt.Errorf("s.repo.Create -> %w", err)
 	}
 
 	return created, nil
 }
 
-func (s *ArticleService) GetArticle(ctx context.Context, id uint) (*domain.Article, error) {
+func (s *ArticleService) GetArticle(ctx context.Context, id uint) (domain.Article, error) {
 	article, err := s.repo.FindByID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("s.repo.FindByID -> %w", err)
+		return domain.Article{}, fmt.Errorf("s.repo.FindByID -> %w", err)
 	}
 
 	return article, nil
