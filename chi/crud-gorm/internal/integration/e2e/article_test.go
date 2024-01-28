@@ -78,7 +78,10 @@ func (s *ArticleHandlerTestSuite) SetupTest() {
 	require.NoError(s.T(), err)
 
 	// Create API server.
-	s.server = api.NewServer(&config.APIConfig{}, s.db)
+	s.server = api.NewServer(&config.AppConfig{
+		API:      &config.APIConfig{},
+		Postgres: &config.PostgresConfig{},
+	}, s.db)
 }
 
 func (s *ArticleHandlerTestSuite) TearDownTest() {
