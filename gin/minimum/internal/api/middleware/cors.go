@@ -12,9 +12,9 @@ import (
 func ConfigCORS(allowedDomains []string) gin.HandlerFunc {
 	conf := cors.Config{
 		AllowOriginFunc:  createAllowedOriginFunc(allowedDomains),
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposeHeaders:    []string{"Link"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Accept", "Authorization", "X-CSRF-Token"},
+		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}

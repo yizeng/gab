@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/go-chi/cors"
 )
@@ -11,11 +12,11 @@ import (
 func ConfigCORS(environment string, allowedDomains []string) func(next http.Handler) http.Handler {
 	return cors.Handler(cors.Options{
 		AllowOriginFunc:  createAllowedOriginFunc(allowedDomains),
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
+		ExposedHeaders:   []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           int((12 * time.Hour).Seconds()), // Maximum value not ignored by any of major browsers
 		Debug:            strings.EqualFold(environment, "development"),
 	})
 }
