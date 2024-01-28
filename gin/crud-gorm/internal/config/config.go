@@ -43,17 +43,18 @@ func (c *AppConfig) validateConfig() error {
 }
 
 type APIConfig struct {
-	Environment string `mapstructure:"ENV"`
-	Host        string `mapstructure:"HOST"`
-	Port        string `mapstructure:"PORT"`
+	Environment        string   `mapstructure:"ENV"`
+	Port               string   `mapstructure:"PORT"`
+	BaseURL            string   `mapstructure:"BASE_URL"`
+	AllowedCORSDomains []string `mapstructure:"ALLOWED_CORS_DOMAINS"`
 }
 
 func (c *APIConfig) validate() error {
 	return validation.ValidateStruct(
 		c,
 		validation.Field(&c.Environment, validation.Required),
-		validation.Field(&c.Host, validation.Required),
 		validation.Field(&c.Port, validation.Required),
+		validation.Field(&c.BaseURL, validation.Required),
 	)
 }
 
@@ -62,7 +63,7 @@ type GinConfig struct {
 }
 
 func (c *GinConfig) validate() error {
-	allowed := []any{
+	allowedModes := []any{
 		gin.TestMode,
 		gin.DebugMode,
 		gin.ReleaseMode,
@@ -70,7 +71,7 @@ func (c *GinConfig) validate() error {
 
 	return validation.ValidateStruct(
 		c,
-		validation.Field(&c.Mode, validation.Required, validation.In(allowed...)),
+		validation.Field(&c.Mode, validation.Required, validation.In(allowedModes...)),
 	)
 }
 

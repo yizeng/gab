@@ -1,8 +1,6 @@
 package api
 
 import (
-	"fmt"
-
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
@@ -19,21 +17,17 @@ import (
 )
 
 type Server struct {
-	Address string
-	Config  *config.AppConfig
-	Router  *gin.Engine
+	Config *config.AppConfig
+	Router *gin.Engine
 }
 
 func NewServer(conf *config.AppConfig, db *gorm.DB) *Server {
-	address := fmt.Sprintf("%v:%v", conf.API.Host, conf.API.Port)
-
 	gin.SetMode(conf.Gin.Mode)
 	engine := gin.New()
 
 	s := &Server{
-		Address: address,
-		Config:  conf,
-		Router:  engine,
+		Config: conf,
+		Router: engine,
 	}
 
 	s.MountMiddlewares()
@@ -58,7 +52,7 @@ func (s *Server) MountMiddlewares() {
 	s.Router.Use(gin.Logger())
 	s.Router.Use(gin.Recovery())
 	s.Router.Use(requestid.New())
-	s.Router.Use(middleware.ConfigCORS(s.Config.API.Host))
+	s.Router.Use(middleware.ConfigCORS(s.Config.API.AllowedCORSDomains))
 }
 
 func (s *Server) MountHandlers(articleHandler *v1.ArticleHandler) {
@@ -75,7 +69,7 @@ func (s *Server) MountHandlers(articleHandler *v1.ArticleHandler) {
 	s.Router.GET("/", v1.HandleHealthcheck)
 
 	// Setup Swagger UI.
-	docs.SwaggerInfo.Host = s.Address
+	docs.SwaggerInfo.Host = s.Config.API.BaseURL
 	docs.SwaggerInfo.BasePath = basePath
 	docs.SwaggerInfo.Title = "API for gin/crud-gorm"
 	docs.SwaggerInfo.Description = "This is an example of Go API with Gin."
