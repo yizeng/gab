@@ -13,8 +13,6 @@ services:
       context: .
       target: development
     env_file: .env
-    environment: # Overwrite some ENVs for Docker environment.
-      - API_HOST=0.0.0.0
     volumes:
       - .:/project
     ports:
