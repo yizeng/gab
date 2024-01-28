@@ -27,11 +27,11 @@ func Start() {
 		panic(fmt.Sprintf("failed to initialize database -> %v", err))
 	}
 
-	s := api.NewServer(conf.API, postgresDB)
+	s := api.NewServer(conf, postgresDB)
 
-	zap.L().Info("starting server at...", zap.String("address", s.Address))
-
-	if err = http.ListenAndServe(s.Address, s.Router); err != nil {
+	addr := ":" + s.Config.API.Port
+	zap.L().Info(fmt.Sprintf("starting server at %v", addr))
+	if err = http.ListenAndServe(addr, s.Router); err != nil {
 		panic(fmt.Sprintf("failed to start the server -> %v", err))
 	}
 }

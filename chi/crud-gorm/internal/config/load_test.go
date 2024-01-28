@@ -3,15 +3,19 @@ package config
 import (
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
 const (
-	apiENV  = "test"
-	apiHost = "test"
-	apiPort = "1234"
+	apiENV                = "test"
+	apiPort               = "1234"
+	apiBaseURL            = "http://localhost:" + apiPort
+	apiAllowedCORSDomains = "my-domain1.com,my-domain2.com"
+
+	ginMode = "debug"
 
 	postgresHost     = "pg"
 	postgresPort     = "5678"
@@ -43,9 +47,10 @@ func TestLoad(t *testing.T) {
 			},
 			want: &AppConfig{
 				API: &APIConfig{
-					Environment: apiENV,
-					Host:        apiHost,
-					Port:        apiPort,
+					Environment:        apiENV,
+					Port:               apiPort,
+					BaseURL:            apiBaseURL,
+					AllowedCORSDomains: strings.Split(apiAllowedCORSDomains, ","),
 				},
 				Postgres: &PostgresConfig{
 					Host:     postgresHost,
@@ -145,15 +150,17 @@ func TestLoad(t *testing.T) {
 
 func setENVs(t *testing.T) {
 	m := map[string]string{
-		"API_ENV":            apiENV,
-		"API_HOST":           apiHost,
-		"API_PORT":           apiPort,
-		"POSTGRES_HOST":      postgresHost,
-		"POSTGRES_PORT":      postgresPort,
-		"POSTGRES_USER":      postgresUsername,
-		"POSTGRES_PASSWORD":  postgresPassword,
-		"POSTGRES_DB":        postgresDB,
-		"POSTGRES_LOG_LEVEL": postgresLogLevel,
+		"API_ENV":                  apiENV,
+		"API_PORT":                 apiPort,
+		"API_BASE_URL":             apiBaseURL,
+		"API_ALLOWED_CORS_DOMAINS": apiAllowedCORSDomains,
+		"GIN_MODE":                 ginMode,
+		"POSTGRES_HOST":            postgresHost,
+		"POSTGRES_PORT":            postgresPort,
+		"POSTGRES_USER":            postgresUsername,
+		"POSTGRES_PASSWORD":        postgresPassword,
+		"POSTGRES_DB":              postgresDB,
+		"POSTGRES_LOG_LEVEL":       postgresLogLevel,
 	}
 
 	for k, v := range m {

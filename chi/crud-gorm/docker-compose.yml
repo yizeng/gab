@@ -15,7 +15,6 @@ services:
     restart: always
     env_file: .env
     environment: # Overwrite some ENVs for Docker environment.
-      - API_HOST=0.0.0.0
       - POSTGRES_HOST=postgres
     volumes:
       - .:/project

@@ -22,22 +22,19 @@ import (
 )
 
 type Server struct {
-	Address string
-	Config  *config.APIConfig
-	Router  *chi.Mux
+	Config *config.AppConfig
+	Router *chi.Mux
 }
 
-func NewServer(conf *config.APIConfig, db *gorm.DB) *Server {
-	address := fmt.Sprintf("%v:%v", conf.Host, conf.Port)
-	articleHandler := initArticleHandler(db)
-
+func NewServer(conf *config.AppConfig, db *gorm.DB) *Server {
 	s := &Server{
-		Address: address,
-		Config:  conf,
-		Router:  chi.NewRouter(),
+		Config: conf,
+		Router: chi.NewRouter(),
 	}
 
 	s.MountMiddlewares()
+
+	articleHandler := initArticleHandler(db)
 	s.MountHandlers(articleHandler)
 
 	return s
@@ -59,7 +56,7 @@ func (s *Server) MountMiddlewares() {
 	s.Router.Use(chimiddleware.CleanPath)
 	s.Router.Use(chimiddleware.Heartbeat("/"))
 
-	s.Router.Use(middleware.ConfigCORS(s.Config.Host, s.Config.Environment))
+	s.Router.Use(middleware.ConfigCORS(s.Config.API.Environment, s.Config.API.AllowedCORSDomains))
 	s.Router.Use(render.SetContentType(render.ContentTypeJSON))
 }
 
@@ -77,7 +74,7 @@ func (s *Server) MountHandlers(articleHandler *v1.ArticleHandler) {
 	s.Router.Mount(basePath, apiV1Router)
 
 	// Setup Swagger UI.
-	docs.SwaggerInfo.Host = s.Address
+	docs.SwaggerInfo.Host = s.Config.API.BaseURL
 	docs.SwaggerInfo.BasePath = basePath
 	docs.SwaggerInfo.Title = "API for chi/crud-gorm"
 	docs.SwaggerInfo.Description = "This is an example of Go API with Chi router."

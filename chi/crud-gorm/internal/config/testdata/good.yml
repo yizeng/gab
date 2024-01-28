@@ -3,8 +3,9 @@
 # See https://github.com/spf13/viper/issues/584 for more details.
 api:
   env:
-  host:
   port:
+  base_url:
+  allowed_cors_domains:
 postgres:
   host:
   port:
