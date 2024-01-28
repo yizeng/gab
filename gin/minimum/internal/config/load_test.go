@@ -21,10 +21,13 @@ func TestLoad(t *testing.T) {
 				err := os.Setenv("API_ENV", "test")
 				require.NoError(t, err)
 
-				err = os.Setenv("API_HOST", "test.com")
+				err = os.Setenv("API_PORT", "1234")
 				require.NoError(t, err)
 
-				err = os.Setenv("API_PORT", "1234")
+				err = os.Setenv("API_BASE_URL", "https://test.com")
+				require.NoError(t, err)
+
+				err = os.Setenv("API_ALLOWED_CORS_DOMAINS", "a.com,b.com")
 				require.NoError(t, err)
 
 				err = os.Setenv("GIN_MODE", "debug")
@@ -32,9 +35,10 @@ func TestLoad(t *testing.T) {
 			},
 			want: &AppConfig{
 				API: &APIConfig{
-					Environment: "test",
-					Host:        "test.com",
-					Port:        "1234",
+					Environment:        "test",
+					Port:               "1234",
+					BaseURL:            "https://test.com",
+					AllowedCORSDomains: []string{"a.com", "b.com"},
 				},
 				Gin: &GinConfig{
 					Mode: "debug",

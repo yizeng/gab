@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"net/url"
 	"strings"
 	"time"
 
@@ -8,15 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ConfigCORS(host string) gin.HandlerFunc {
+func ConfigCORS(allowedDomains []string) gin.HandlerFunc {
 	conf := cors.Config{
-		AllowOriginFunc: func(origin string) bool {
-			if strings.HasPrefix(origin, "http://localhost") || strings.HasPrefix(origin, "http://0.0.0.0") {
-				return true
-			}
-
-			return strings.HasPrefix(origin, host)
-		},
+		AllowOriginFunc:  createAllowedOriginFunc(allowedDomains),
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposeHeaders:    []string{"Link"},
@@ -25,4 +20,24 @@ func ConfigCORS(host string) gin.HandlerFunc {
 	}
 
 	return cors.New(conf)
+}
+
+func createAllowedOriginFunc(allowedDomains []string) func(origin string) bool {
+	return func(origin string) bool {
+		o, err := url.Parse(origin)
+		if err != nil {
+			return false
+		}
+		hostname := o.Hostname()
+
+		localDomains := []string{"localhost", "127.0.0.1", "0.0.0.0"}
+		allowedDomains = append(allowedDomains, localDomains...)
+		for _, domain := range allowedDomains {
+			if strings.EqualFold(hostname, domain) || strings.HasSuffix(hostname, "."+domain) {
+				return true
+			}
+		}
+
+		return false
+	}
 }

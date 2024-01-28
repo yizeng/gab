@@ -23,9 +23,9 @@ func Start() {
 
 	s := api.NewServer(conf)
 
-	zap.L().Info(fmt.Sprintf("starting server at %v", s.Address))
-	err = s.Router.Run(s.Address)
-	if err != nil {
+	addr := ":" + s.Config.API.Port
+	zap.L().Info(fmt.Sprintf("starting server at %v", addr))
+	if err = s.Router.Run(addr); err != nil {
 		panic(fmt.Sprintf("failed to start the server -> %v", err))
 	}
 }
