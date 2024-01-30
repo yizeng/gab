@@ -28,8 +28,7 @@ func (req *CreateArticleRequest) Validate() error {
 }
 
 func (req *CreateArticleRequest) Bind(r *http.Request) error {
-	err := req.Validate()
-	if err != nil {
+	if err := req.Validate(); err != nil {
 		return err
 	}
 

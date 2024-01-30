@@ -42,8 +42,7 @@ func InitPostgres() *Dockertester {
 		log.Fatalf("Could not construct pool: %s", err)
 	}
 
-	err = pool.Client.Ping()
-	if err != nil {
+	if err = pool.Client.Ping(); err != nil {
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
 

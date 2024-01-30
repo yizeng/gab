@@ -44,8 +44,7 @@ func (h *CountryHandler) HandleSumPopulationByState(w http.ResponseWriter, r *ht
 
 	totalPopulation := h.svc.SumPopulationByState(r.Context(), req.States)
 
-	err := render.Render(w, r, response.NewSumPopulationByStateResult(totalPopulation))
-	if err != nil {
+	if err := render.Render(w, r, response.NewSumPopulationByStateResult(totalPopulation)); err != nil {
 		_ = render.Render(w, r, response.NewInternalServerError(err))
 
 		return

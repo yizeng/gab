@@ -70,8 +70,7 @@ func (h *ArticleHandler) HandleCreateArticle(w http.ResponseWriter, r *http.Requ
 	}
 
 	render.Status(r, http.StatusCreated)
-	err = render.Render(w, r, response.NewArticle(&article))
-	if err != nil {
+	if err = render.Render(w, r, response.NewArticle(&article)); err != nil {
 		_ = render.Render(w, r, response.NewInternalServerError(err))
 
 		return
@@ -117,8 +116,7 @@ func (h *ArticleHandler) HandleGetArticle(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = render.Render(w, r, response.NewArticle(&article))
-	if err != nil {
+	if err = render.Render(w, r, response.NewArticle(&article)); err != nil {
 		_ = render.Render(w, r, response.NewInternalServerError(err))
 
 		return
@@ -160,8 +158,7 @@ func (h *ArticleHandler) HandleListArticles(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = render.RenderList(w, r, response.NewArticles(articles))
-	if err != nil {
+	if err = render.RenderList(w, r, response.NewArticles(articles)); err != nil {
 		_ = render.Render(w, r, response.NewInternalServerError(err))
 
 		return
@@ -189,8 +186,7 @@ func (h *ArticleHandler) HandleSearchArticles(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	err = render.RenderList(w, r, response.NewArticles(articles))
-	if err != nil {
+	if err = render.RenderList(w, r, response.NewArticles(articles)); err != nil {
 		_ = render.Render(w, r, response.NewInternalServerError(err))
 
 		return

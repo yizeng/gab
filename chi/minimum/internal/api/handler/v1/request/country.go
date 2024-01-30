@@ -23,8 +23,7 @@ func (req *SumPopulationByState) Validate() error {
 func eachState(value any) error {
 	states, _ := value.([]domain.State)
 	for _, s := range states {
-		err := s.Validate()
-		if err != nil {
+		if err := s.Validate(); err != nil {
 			return err
 		}
 	}
@@ -33,8 +32,7 @@ func eachState(value any) error {
 }
 
 func (req *SumPopulationByState) Bind(r *http.Request) error {
-	err := req.Validate()
-	if err != nil {
+	if err := req.Validate(); err != nil {
 		return err
 	}
 
