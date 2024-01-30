@@ -12,19 +12,19 @@ import (
 	"github.com/yizeng/gab/chi/crud-gorm/internal/logger"
 )
 
-func Start() {
+func Start() error {
 	conf, err := config.Load("./cmd/app/config.yml")
 	if err != nil {
-		panic(fmt.Sprintf("failed to initialize config -> %v", err))
+		return fmt.Errorf("failed to initialize config -> %w", err)
 	}
 
 	if err = logger.Init(conf.API.Environment); err != nil {
-		panic(fmt.Sprintf("failed to initialize logger -> %v", err))
+		return fmt.Errorf("failed to initialize logger -> %w", err)
 	}
 
 	postgresDB, err := db.OpenPostgres(conf.Postgres)
 	if err != nil {
-		panic(fmt.Sprintf("failed to initialize database -> %v", err))
+		return fmt.Errorf("failed to initialize database -> %w", err)
 	}
 
 	s := api.NewServer(conf, postgresDB)
@@ -32,6 +32,8 @@ func Start() {
 	addr := ":" + s.Config.API.Port
 	zap.L().Info(fmt.Sprintf("starting server at %v", addr))
 	if err = http.ListenAndServe(addr, s.Router); err != nil {
-		panic(fmt.Sprintf("failed to start the server -> %v", err))
+		return fmt.Errorf("failed to start the server -> %w", err)
 	}
+
+	return nil
 }

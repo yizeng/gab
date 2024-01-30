@@ -11,15 +11,14 @@ import (
 	"github.com/yizeng/gab/chi/minimum/internal/logger"
 )
 
-func Start() {
+func Start() error {
 	conf, err := config.Load()
 	if err != nil {
-		panic(fmt.Sprintf("failed to initialize config -> %v", err))
+		return fmt.Errorf("failed to initialize config -> %w", err)
 	}
 
-	err = logger.Init(conf.API.Environment)
-	if err != nil {
-		panic(fmt.Sprintf("failed to initialize logger -> %v", err))
+	if err = logger.Init(conf.API.Environment); err != nil {
+		return fmt.Errorf("failed to initialize logger -> %w", err)
 	}
 
 	s := api.NewServer(conf.API)
@@ -27,6 +26,8 @@ func Start() {
 	addr := ":" + s.Config.Port
 	zap.L().Info(fmt.Sprintf("starting server at %v", addr))
 	if err = http.ListenAndServe(addr, s.Router); err != nil {
-		panic(fmt.Sprintf("failed to start the server -> %v", err))
+		return fmt.Errorf("failed to start the server -> %w", err)
 	}
+
+	return nil
 }
