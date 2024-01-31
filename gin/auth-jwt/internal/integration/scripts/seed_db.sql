@@ -1,0 +1,2 @@
+INSERT INTO "articles" ("id", "user_id", "title", "content", "created_at", "updated_at") VALUES (999, 123, 'seeded title 999', 'seeded content 999', '2024-01-31 15:26:31.804593+00', '2024-01-31 15:26:31.804593+00');
+INSERT INTO "articles" ("id", "user_id", "title", "content", "created_at", "updated_at") VALUES (888, 123, 'seeded title 888', 'seeded content 888', '2024-01-31 15:26:31.804593+00', '2024-01-31 15:26:31.804593+00');
