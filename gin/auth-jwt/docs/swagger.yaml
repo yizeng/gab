@@ -96,6 +96,10 @@ paths:
             items:
               $ref: '#/definitions/domain.Article'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -122,6 +126,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.ErrResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -146,6 +154,10 @@ paths:
             $ref: '#/definitions/domain.Article'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrResponse'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/response.ErrResponse'
         "404":
@@ -179,6 +191,10 @@ paths:
             items:
               $ref: '#/definitions/domain.Article'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrResponse'
         "500":
           description: Internal Server Error
           schema:

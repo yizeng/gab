@@ -14,6 +14,7 @@ const (
 	apiPort               = "1234"
 	apiBaseURL            = "localhost:" + apiPort
 	apiAllowedCORSDomains = "my-domain1.com,my-domain2.com"
+	apiJWTSigningKey      = "test_jwt_key"
 
 	ginMode = "debug"
 
@@ -51,6 +52,7 @@ func TestLoad(t *testing.T) {
 					Port:               apiPort,
 					BaseURL:            apiBaseURL,
 					AllowedCORSDomains: strings.Split(apiAllowedCORSDomains, ","),
+					JWTSigningKey:      apiJWTSigningKey,
 				},
 				Gin: &GinConfig{
 					Mode: ginMode,
@@ -187,6 +189,7 @@ func setENVs(t *testing.T) {
 		"API_PORT":                 apiPort,
 		"API_BASE_URL":             apiBaseURL,
 		"API_ALLOWED_CORS_DOMAINS": apiAllowedCORSDomains,
+		"API_JWT_SIGNING_KEY":      apiJWTSigningKey,
 		"GIN_MODE":                 ginMode,
 		"POSTGRES_HOST":            postgresHost,
 		"POSTGRES_PORT":            postgresPort,

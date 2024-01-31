@@ -47,6 +47,7 @@ type APIConfig struct {
 	Port               string   `mapstructure:"PORT"`
 	BaseURL            string   `mapstructure:"BASE_URL"`
 	AllowedCORSDomains []string `mapstructure:"ALLOWED_CORS_DOMAINS"`
+	JWTSigningKey      string   `mapstructure:"JWT_SIGNING_KEY"`
 }
 
 func (c *APIConfig) validate() error {
@@ -55,6 +56,7 @@ func (c *APIConfig) validate() error {
 		validation.Field(&c.Environment, validation.Required),
 		validation.Field(&c.Port, validation.Required),
 		validation.Field(&c.BaseURL, validation.Required),
+		validation.Field(&c.JWTSigningKey, validation.Required),
 	)
 }
 

@@ -3,6 +3,8 @@ package response
 import (
 	"fmt"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 type ErrResponse struct {
@@ -53,5 +55,15 @@ func NewWrongCredentials(err error) *ErrResponse {
 		StackErr:   nil, // here we don't want to log err to StackErr.
 		StatusCode: http.StatusUnauthorized,
 		ErrorMsg:   err.Error(),
+	}
+}
+
+func NewJWTVerificationError(err error) *ErrResponse {
+	zap.L().Debug("unable to verify JWT: " + err.Error())
+
+	return &ErrResponse{
+		StackErr:   nil, // here we don't want to log err to StackErr.
+		StatusCode: http.StatusUnauthorized,
+		ErrorMsg:   "please log in",
 	}
 }

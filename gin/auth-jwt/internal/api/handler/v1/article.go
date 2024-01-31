@@ -40,6 +40,7 @@ func NewArticleHandler(svc ArticleService) *ArticleHandler {
 // @Param        request   body      request.CreateArticleRequest true "request body"
 // @Success      200      {object}   domain.Article
 // @Failure      400      {object}   response.ErrResponse
+// @Success      401      {object}   response.ErrResponse
 // @Failure      500      {object}   response.ErrResponse
 // @Router       /articles [post]
 func (h *ArticleHandler) HandleCreateArticle(ctx *gin.Context) {
@@ -84,6 +85,7 @@ func (h *ArticleHandler) HandleCreateArticle(ctx *gin.Context) {
 // @Param        articleID   path    int  true "article ID"
 // @Success      200      {object}   domain.Article
 // @Failure      400      {object}   response.ErrResponse
+// @Success      401      {object}   response.ErrResponse
 // @Failure      404      {object}   response.ErrResponse
 // @Failure      500      {object}   response.ErrResponse
 // @Router       /articles/{articleID} [get]
@@ -126,6 +128,7 @@ func (h *ArticleHandler) HandleGetArticle(ctx *gin.Context) {
 // @Param        page     query      int  false  "which page to load. Default to 1 if empty."
 // @Param        per_page query      int  false  "how many items per page. Default to 10 if empty."
 // @Success      200      {object}   []domain.Article
+// @Success      401      {object}   response.ErrResponse
 // @Failure      500      {object}   response.ErrResponse
 // @Router       /articles [get]
 func (h *ArticleHandler) HandleListArticles(ctx *gin.Context) {
@@ -160,6 +163,7 @@ func (h *ArticleHandler) HandleListArticles(ctx *gin.Context) {
 // @Param        title    query     string  false  "search by title"
 // @Param        content  query     string  false  "search by content"
 // @Success      200      {object}   []domain.Article
+// @Success      401      {object}   response.ErrResponse
 // @Failure      500      {object}   response.ErrResponse
 // @Router       /articles/search [get]
 func (h *ArticleHandler) HandleSearchArticles(ctx *gin.Context) {

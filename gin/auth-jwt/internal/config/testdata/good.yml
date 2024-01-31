@@ -6,6 +6,7 @@ api:
   port:
   base_url:
   allowed_cors_domains:
+  jwt_signing_key:
 gin:
   mode:
 postgres:

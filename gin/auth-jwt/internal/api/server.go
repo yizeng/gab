@@ -32,15 +32,15 @@ func NewServer(conf *config.AppConfig, db *gorm.DB) *Server {
 
 	s.MountMiddlewares()
 
-	authHandler := initAuthHandler(db)
-	userHandler := initUserHandler(db)
-	articleHandler := initArticleHandler(db)
+	authHandler := s.initAuthHandler(db)
+	userHandler := s.initUserHandler(db)
+	articleHandler := s.initArticleHandler(db)
 	s.MountHandlers(authHandler, userHandler, articleHandler)
 
 	return s
 }
 
-func initArticleHandler(db *gorm.DB) *v1.ArticleHandler {
+func (s *Server) initArticleHandler(db *gorm.DB) *v1.ArticleHandler {
 	articleDAO := dao.NewArticleDAO(db)
 	repo := repository.NewArticleRepository(articleDAO)
 	svc := service.NewArticleService(repo)
@@ -49,16 +49,16 @@ func initArticleHandler(db *gorm.DB) *v1.ArticleHandler {
 	return handler
 }
 
-func initAuthHandler(db *gorm.DB) *v1.AuthHandler {
+func (s *Server) initAuthHandler(db *gorm.DB) *v1.AuthHandler {
 	userDAO := dao.NewUserDAO(db)
 	repo := repository.NewUserRepository(userDAO)
 	svc := service.NewAuthService(repo)
-	handler := v1.NewAuthHandler(svc)
+	handler := v1.NewAuthHandler(s.Config.API, svc)
 
 	return handler
 }
 
-func initUserHandler(db *gorm.DB) *v1.UserHandler {
+func (s *Server) initUserHandler(db *gorm.DB) *v1.UserHandler {
 	userDAO := dao.NewUserDAO(db)
 	repo := repository.NewUserRepository(userDAO)
 	svc := service.NewUserService(repo)
@@ -78,17 +78,23 @@ func (s *Server) MountMiddlewares() {
 func (s *Server) MountHandlers(authHandler *v1.AuthHandler, userHandler *v1.UserHandler, articleHandler *v1.ArticleHandler) {
 	const basePath = "/api/v1"
 
-	apiV1 := s.Router.Group(basePath)
+	auth := s.Router.Group(basePath)
 	{
-		apiV1.GET("/articles", middleware.Paginate(), articleHandler.HandleListArticles)
-		apiV1.POST("/articles", articleHandler.HandleCreateArticle)
-		apiV1.GET("/articles/:articleID", articleHandler.HandleGetArticle)
-		apiV1.GET("/articles/search", articleHandler.HandleSearchArticles)
+		auth.POST("/auth/signup", authHandler.HandleSignup)
+		auth.POST("/auth/login", authHandler.HandleLogin)
+	}
 
-		apiV1.POST("/auth/signup", authHandler.HandleSignup)
-		apiV1.POST("/auth/login", authHandler.HandleLogin)
+	users := s.Router.Group(basePath, middleware.NewAuthenticator(s.Config.API.JWTSigningKey).VerifyJWT())
+	{
+		users.GET("/users/:userID", userHandler.HandleGetUser)
+	}
 
-		apiV1.GET("/users/:userID", userHandler.HandleGetUser)
+	articles := s.Router.Group(basePath)
+	{
+		articles.GET("/articles", middleware.Paginate(), articleHandler.HandleListArticles)
+		articles.POST("/articles", articleHandler.HandleCreateArticle)
+		articles.GET("/articles/:articleID", articleHandler.HandleGetArticle)
+		articles.GET("/articles/search", articleHandler.HandleSearchArticles)
 	}
 
 	s.Router.GET("/", v1.HandleHealthcheck)

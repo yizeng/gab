@@ -75,6 +75,7 @@ Then navigate to <http://localhost:3333/swagger/index.html> to view the API docu
 - [go-ozzo/ozzo-validation][go-ozzo/ozzo-validation] - An idiomatic Go (golang) validation package. Supports configurable and extensible validation rules (validators) using normal language constructs instead of error-prone struct tags.
 - [swaggo/gin-swagger][swaggo/gin-swagger] - gin middleware to automatically generate RESTful API documentation with Swagger 2.0.
 - [dlclark/regexp2][dlclark/regexp2] - A full-featured regex engine in pure Go based on the .NET engine
+- [golang-jwt/jwt][golang-jwt/jwt] - Golang implementation of JSON Web Tokens (JWT).
 
 ### Database
 - [PostgreSQL][PostgreSQL] - The World's Most Advanced Open Source Relational Database
@@ -98,3 +99,4 @@ Then navigate to <http://localhost:3333/swagger/index.html> to view the API docu
 [swaggo/swag]: https://github.com/swaggo/swag
 [swaggo/gin-swagger]: https://github.com/swaggo/gin-swagger
 [dlclark/regexp2]: https://github.com/dlclark/regexp2
+[golang-jwt/jwt]: https://github.com/golang-jwt/jwt

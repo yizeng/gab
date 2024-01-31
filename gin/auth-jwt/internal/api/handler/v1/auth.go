@@ -10,7 +10,9 @@ import (
 
 	"github.com/yizeng/gab/gin/auth-jwt/internal/api/handler/v1/request"
 	"github.com/yizeng/gab/gin/auth-jwt/internal/api/handler/v1/response"
+	"github.com/yizeng/gab/gin/auth-jwt/internal/config"
 	"github.com/yizeng/gab/gin/auth-jwt/internal/domain"
+	"github.com/yizeng/gab/gin/auth-jwt/internal/pkg/jwt"
 	"github.com/yizeng/gab/gin/auth-jwt/internal/service"
 )
 
@@ -20,12 +22,14 @@ type AuthService interface {
 }
 
 type AuthHandler struct {
-	svc AuthService
+	conf *config.APIConfig
+	svc  AuthService
 }
 
-func NewAuthHandler(svc AuthService) *AuthHandler {
+func NewAuthHandler(conf *config.APIConfig, svc AuthService) *AuthHandler {
 	return &AuthHandler{
-		svc: svc,
+		conf: conf,
+		svc:  svc,
 	}
 }
 
@@ -109,5 +113,16 @@ func (h *AuthHandler) HandleLogin(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	token, err := jwt.GenerateToken([]byte(h.conf.JWTSigningKey), user.ID, ctx.Request.UserAgent())
+	if err != nil {
+		err = fmt.Errorf("v1.HandleSignup -> middleware.GenerateToken() -> %w", err)
+		response.RenderError(ctx, response.NewInternalServerError(err))
+
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response.LoginResponse{
+		Token: token,
+		User:  user,
+	})
 }
