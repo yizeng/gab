@@ -32,19 +32,39 @@ func NewServer(conf *config.AppConfig, db *gorm.DB) *Server {
 
 	s.MountMiddlewares()
 
+	authHandler := initAuthHandler(db)
+	userHandler := initUserHandler(db)
 	articleHandler := initArticleHandler(db)
-	s.MountHandlers(articleHandler)
+	s.MountHandlers(authHandler, userHandler, articleHandler)
 
 	return s
 }
 
 func initArticleHandler(db *gorm.DB) *v1.ArticleHandler {
 	articleDAO := dao.NewArticleDAO(db)
-	articleRepo := repository.NewArticleRepository(articleDAO)
-	articleSvc := service.NewArticleService(articleRepo)
-	articleHandler := v1.NewArticleHandler(articleSvc)
+	repo := repository.NewArticleRepository(articleDAO)
+	svc := service.NewArticleService(repo)
+	handler := v1.NewArticleHandler(svc)
 
-	return articleHandler
+	return handler
+}
+
+func initAuthHandler(db *gorm.DB) *v1.AuthHandler {
+	userDAO := dao.NewUserDAO(db)
+	repo := repository.NewUserRepository(userDAO)
+	svc := service.NewAuthService(repo)
+	handler := v1.NewAuthHandler(svc)
+
+	return handler
+}
+
+func initUserHandler(db *gorm.DB) *v1.UserHandler {
+	userDAO := dao.NewUserDAO(db)
+	repo := repository.NewUserRepository(userDAO)
+	svc := service.NewUserService(repo)
+	handler := v1.NewUserHandler(svc)
+
+	return handler
 }
 
 func (s *Server) MountMiddlewares() {
@@ -55,7 +75,7 @@ func (s *Server) MountMiddlewares() {
 	s.Router.Use(middleware.ConfigCORS(s.Config.API.AllowedCORSDomains))
 }
 
-func (s *Server) MountHandlers(articleHandler *v1.ArticleHandler) {
+func (s *Server) MountHandlers(authHandler *v1.AuthHandler, userHandler *v1.UserHandler, articleHandler *v1.ArticleHandler) {
 	const basePath = "/api/v1"
 
 	apiV1 := s.Router.Group(basePath)
@@ -64,6 +84,11 @@ func (s *Server) MountHandlers(articleHandler *v1.ArticleHandler) {
 		apiV1.POST("/articles", articleHandler.HandleCreateArticle)
 		apiV1.GET("/articles/:articleID", articleHandler.HandleGetArticle)
 		apiV1.GET("/articles/search", articleHandler.HandleSearchArticles)
+
+		apiV1.POST("/auth/signup", authHandler.HandleSignup)
+		apiV1.POST("/auth/login", authHandler.HandleLogin)
+
+		apiV1.GET("/users/:userID", userHandler.HandleGetUser)
 	}
 
 	s.Router.GET("/", v1.HandleHealthcheck)

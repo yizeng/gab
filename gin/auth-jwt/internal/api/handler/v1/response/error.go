@@ -47,3 +47,11 @@ func NewNotFound(resourceName, fieldName string, fieldValue any) *ErrResponse {
 		ErrorMsg:   msg,
 	}
 }
+
+func NewWrongCredentials(err error) *ErrResponse {
+	return &ErrResponse{
+		StackErr:   nil, // here we don't want to log err to StackErr.
+		StatusCode: http.StatusUnauthorized,
+		ErrorMsg:   err.Error(),
+	}
+}
