@@ -13,9 +13,10 @@ type ErrResponse struct {
 	StackErr error `json:"-"` // stack error for logging
 }
 
-func NewBadRequest(msg string) *ErrResponse {
+func NewBadRequest(err error) *ErrResponse {
 	return &ErrResponse{
+		StackErr:   nil, // here we don't want to log err to StackErr.
 		StatusCode: http.StatusBadRequest,
-		ErrorMsg:   msg,
+		ErrorMsg:   err.Error(),
 	}
 }

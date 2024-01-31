@@ -46,7 +46,7 @@ func NewArticleHandler(svc ArticleService) *ArticleHandler {
 func (h *ArticleHandler) HandleCreateArticle(w http.ResponseWriter, r *http.Request) {
 	req := request.CreateArticleRequest{}
 	if err := render.Bind(r, &req); err != nil {
-		_ = render.Render(w, r, response.NewBadRequest(err.Error()))
+		_ = render.Render(w, r, response.NewBadRequest(err))
 
 		return
 	}
@@ -58,7 +58,7 @@ func (h *ArticleHandler) HandleCreateArticle(w http.ResponseWriter, r *http.Requ
 	})
 	if err != nil {
 		if errors.Is(err, service.ErrArticleDuplicated) {
-			_ = render.Render(w, r, response.NewBadRequest(service.ErrArticleDuplicated.Error()))
+			_ = render.Render(w, r, response.NewBadRequest(service.ErrArticleDuplicated))
 
 			return
 		}

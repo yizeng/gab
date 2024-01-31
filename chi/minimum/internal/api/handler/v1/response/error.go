@@ -26,10 +26,11 @@ func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func NewBadRequest(msg string) *ErrResponse {
+func NewBadRequest(err error) *ErrResponse {
 	return &ErrResponse{
+		StackErr:   nil, // here we don't want to log err to StackErr.
 		StatusCode: http.StatusBadRequest,
-		ErrorMsg:   msg,
+		ErrorMsg:   err.Error(),
 	}
 }
 

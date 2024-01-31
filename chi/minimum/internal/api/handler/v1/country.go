@@ -37,7 +37,7 @@ func NewCountryHandler(svc CountryService) *CountryHandler {
 func (h *CountryHandler) HandleSumPopulationByState(w http.ResponseWriter, r *http.Request) {
 	req := request.SumPopulationByState{}
 	if err := render.Bind(r, &req); err != nil {
-		_ = render.Render(w, r, response.NewBadRequest(err.Error()))
+		_ = render.Render(w, r, response.NewBadRequest(err))
 
 		return
 	}

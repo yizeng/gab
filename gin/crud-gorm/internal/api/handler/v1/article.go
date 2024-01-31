@@ -45,13 +45,13 @@ func NewArticleHandler(svc ArticleService) *ArticleHandler {
 func (h *ArticleHandler) HandleCreateArticle(ctx *gin.Context) {
 	req := request.CreateArticleRequest{}
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.RenderError(ctx, response.NewBadRequest(err.Error()))
+		response.RenderError(ctx, response.NewBadRequest(err))
 
 		return
 	}
 
 	if err := req.Validate(); err != nil {
-		response.RenderError(ctx, response.NewBadRequest(err.Error()))
+		response.RenderError(ctx, response.NewBadRequest(err))
 
 		return
 	}
@@ -63,7 +63,7 @@ func (h *ArticleHandler) HandleCreateArticle(ctx *gin.Context) {
 	})
 	if err != nil {
 		if errors.Is(err, service.ErrArticleDuplicated) {
-			response.RenderError(ctx, response.NewBadRequest(service.ErrArticleDuplicated.Error()))
+			response.RenderError(ctx, response.NewBadRequest(service.ErrArticleDuplicated))
 
 			return
 		}

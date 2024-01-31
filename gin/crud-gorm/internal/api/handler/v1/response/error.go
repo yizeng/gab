@@ -14,10 +14,19 @@ type ErrResponse struct {
 	StackErr error `json:"-"` // stack error for logging
 }
 
-func NewBadRequest(msg string) *ErrResponse {
+func NewBadRequest(err error) *ErrResponse {
 	return &ErrResponse{
+		StackErr:   nil, // here we don't want to log err to StackErr.
 		StatusCode: http.StatusBadRequest,
-		ErrorMsg:   msg,
+		ErrorMsg:   err.Error(),
+	}
+}
+
+func NewInternalServerError(err error) *ErrResponse {
+	return &ErrResponse{
+		StackErr:   err,
+		StatusCode: http.StatusInternalServerError,
+		ErrorMsg:   "something went wrong",
 	}
 }
 
@@ -36,13 +45,5 @@ func NewNotFound(resourceName, fieldName string, fieldValue any) *ErrResponse {
 	return &ErrResponse{
 		StatusCode: http.StatusNotFound,
 		ErrorMsg:   msg,
-	}
-}
-
-func NewInternalServerError(err error) *ErrResponse {
-	return &ErrResponse{
-		StackErr:   err,
-		StatusCode: http.StatusInternalServerError,
-		ErrorMsg:   "something went wrong",
 	}
 }

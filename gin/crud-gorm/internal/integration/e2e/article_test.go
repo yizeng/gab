@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"os"
 	"strings"
@@ -164,7 +165,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 			want: want{
 				article:  domain.Article{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewBadRequest("content: the length must be between 1 and 5000; title: the length must be between 1 and 128; user_id: cannot be blank."),
+				err:      response.NewBadRequest(errors.New("content: the length must be between 1 and 5000; title: the length must be between 1 and 128; user_id: cannot be blank.")),
 			},
 			wantErr: true,
 		},
@@ -178,7 +179,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 			want: want{
 				article:  domain.Article{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewBadRequest("unexpected EOF"),
+				err:      response.NewBadRequest(errors.New("unexpected EOF")),
 			},
 			wantErr: true,
 		},
@@ -201,7 +202,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 			want: want{
 				article:  domain.Article{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewBadRequest("article already exists"),
+				err:      response.NewBadRequest(errors.New("article already exists")),
 			},
 			wantErr: true,
 		},

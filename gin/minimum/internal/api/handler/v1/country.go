@@ -36,7 +36,7 @@ func NewCountryHandler(svc CountryService) *CountryHandler {
 func (h *CountryHandler) HandleSumPopulationByState(ctx *gin.Context) {
 	req := request.SumPopulationByState{}
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.RenderError(ctx, response.NewBadRequest(err.Error()))
+		response.RenderError(ctx, response.NewBadRequest(err))
 
 		return
 	}
