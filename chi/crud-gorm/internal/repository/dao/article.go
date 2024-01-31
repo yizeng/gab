@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"errors"
+	"time"
 
 	"gorm.io/gorm"
 
@@ -16,11 +17,14 @@ var (
 )
 
 type Article struct {
-	gorm.Model
+	ID uint `gorm:"primaryKey"`
 
 	UserID  uint   `gorm:"uniqueIndex:idx_user_id_title,not null"`
 	Title   string `gorm:"uniqueIndex:idx_user_id_title,not null"`
 	Content string `gorm:"not null"`
+
+	CreatedAt time.Time `gorm:"not null"`
+	UpdatedAt time.Time `gorm:"not null"`
 }
 
 type ArticleDAO struct {
