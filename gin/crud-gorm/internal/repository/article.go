@@ -40,7 +40,7 @@ func (r *ArticleRepository) Create(ctx context.Context, article domain.Article) 
 		return domain.Article{}, fmt.Errorf("r.dao.Insert -> %w", err)
 	}
 
-	return daoToDomain(created), nil
+	return r.daoToDomain(created), nil
 }
 
 func (r *ArticleRepository) FindByID(ctx context.Context, id uint) (domain.Article, error) {
@@ -49,7 +49,7 @@ func (r *ArticleRepository) FindByID(ctx context.Context, id uint) (domain.Artic
 		return domain.Article{}, fmt.Errorf("r.dao.FindByID -> %w", err)
 	}
 
-	return daoToDomain(found), nil
+	return r.daoToDomain(found), nil
 }
 
 func (r *ArticleRepository) FindAll(ctx context.Context, page, perPage uint) ([]domain.Article, error) {
@@ -60,7 +60,7 @@ func (r *ArticleRepository) FindAll(ctx context.Context, page, perPage uint) ([]
 
 	articles := make([]domain.Article, 0, len(allArticles))
 	for _, a := range allArticles {
-		articles = append(articles, daoToDomain(a))
+		articles = append(articles, r.daoToDomain(a))
 	}
 
 	return articles, nil
@@ -74,13 +74,13 @@ func (r *ArticleRepository) Search(ctx context.Context, title, content string) (
 
 	articles := make([]domain.Article, 0, len(allArticles))
 	for _, a := range allArticles {
-		articles = append(articles, daoToDomain(a))
+		articles = append(articles, r.daoToDomain(a))
 	}
 
 	return articles, nil
 }
 
-func daoToDomain(a dao.Article) domain.Article {
+func (r *ArticleRepository) daoToDomain(a dao.Article) domain.Article {
 	return domain.Article{
 		ID:        a.ID,
 		UserID:    a.UserID,
