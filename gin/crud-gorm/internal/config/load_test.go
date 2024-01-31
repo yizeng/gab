@@ -12,7 +12,7 @@ import (
 const (
 	apiENV                = "test"
 	apiPort               = "1234"
-	apiBaseURL            = "http://localhost:" + apiPort
+	apiBaseURL            = "localhost:" + apiPort
 	apiAllowedCORSDomains = "my-domain1.com,my-domain2.com"
 
 	ginMode = "debug"
