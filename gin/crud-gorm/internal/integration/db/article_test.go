@@ -11,8 +11,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
 
-	"github.com/yizeng/gab/gin/crud-gorm/internal/domain"
-	"github.com/yizeng/gab/gin/crud-gorm/internal/repository"
 	"github.com/yizeng/gab/gin/crud-gorm/internal/repository/dao"
 	"github.com/yizeng/gab/gin/crud-gorm/pkg/dockertester"
 )
@@ -24,7 +22,7 @@ type ArticleDBTestSuite struct {
 	pool     *dockertest.Pool
 	resource *dockertest.Resource
 
-	repo *repository.ArticleRepository
+	articleDAO *dao.ArticleDAO
 }
 
 func (s *ArticleDBTestSuite) SetupSuite() {
@@ -51,23 +49,22 @@ func (s *ArticleDBTestSuite) SetupTest() {
 	require.NoError(s.T(), err)
 
 	// Seed database.
-	script, err := os.ReadFile("../scripts/seed_articles.sql")
+	script, err := os.ReadFile("../scripts/seed_db.sql")
 	require.NoError(s.T(), err)
 
 	err = s.db.Exec(string(script)).Error
 	require.NoError(s.T(), err)
 
 	// Initialize repository.
-	daoArticle := dao.NewArticleDAO(s.db)
-	s.repo = repository.NewArticleRepository(daoArticle)
+	s.articleDAO = dao.NewArticleDAO(s.db)
 }
 
 func (s *ArticleDBTestSuite) TearDownTest() {
-	s.deleteAllArticles()
+	s.cleanDB()
 }
 
-func (s *ArticleDBTestSuite) deleteAllArticles() {
-	script, err := os.ReadFile("../scripts/delete_articles.sql")
+func (s *ArticleDBTestSuite) cleanDB() {
+	script, err := os.ReadFile("../scripts/clean_db.sql")
 	require.NoError(s.T(), err)
 
 	err = s.db.Exec(string(script)).Error
@@ -79,7 +76,10 @@ func TestArticleDB(t *testing.T) {
 }
 
 func (s *ArticleDBTestSuite) TestArticleDB_FindByID() {
-	result, err := s.repo.FindByID(context.TODO(), 999)
+	result, err := s.articleDAO.FindByID(context.TODO(), 99999)
+	assert.Error(s.T(), gorm.ErrRecordNotFound)
+
+	result, err = s.articleDAO.FindByID(context.TODO(), 999)
 	assert.NoError(s.T(), err)
 
 	assert.NotNil(s.T(), result)
@@ -89,7 +89,7 @@ func (s *ArticleDBTestSuite) TestArticleDB_FindByID() {
 }
 
 func (s *ArticleDBTestSuite) TestArticleDB_FindAll() {
-	result, err := s.repo.FindAll(context.TODO(), 1, 10)
+	result, err := s.articleDAO.FindAll(context.TODO(), 1, 10)
 	assert.NoError(s.T(), err)
 
 	assert.Equal(s.T(), len(result), 2)
@@ -97,7 +97,7 @@ func (s *ArticleDBTestSuite) TestArticleDB_FindAll() {
 	assert.Equal(s.T(), "seeded title 999", result[0].Title)
 	assert.Equal(s.T(), "seeded content 999", result[0].Content)
 
-	result, err = s.repo.FindAll(context.TODO(), 2, 1)
+	result, err = s.articleDAO.FindAll(context.TODO(), 2, 1)
 	assert.NoError(s.T(), err)
 
 	assert.Equal(s.T(), 1, len(result))
@@ -106,8 +106,23 @@ func (s *ArticleDBTestSuite) TestArticleDB_FindAll() {
 	assert.Equal(s.T(), "seeded content 888", result[0].Content)
 }
 
-func (s *ArticleDBTestSuite) TestArticleDB_Create() {
-	result, err := s.repo.Create(context.TODO(), domain.Article{
+func (s *ArticleDBTestSuite) TestArticleDB_FindAll_Empty() {
+	s.cleanDB()
+
+	result, err := s.articleDAO.FindAll(context.TODO(), 1, 10)
+	assert.NoError(s.T(), err)
+	assert.Empty(s.T(), result)
+}
+
+func (s *ArticleDBTestSuite) TestArticleDB_Insert() {
+	result, err := s.articleDAO.Insert(context.TODO(), dao.Article{
+		UserID:  999,
+		Title:   "seeded title 99",
+		Content: "duplicated",
+	})
+	assert.Error(s.T(), dao.ErrArticleDuplicated)
+
+	result, err = s.articleDAO.Insert(context.TODO(), dao.Article{
 		UserID:  123,
 		Title:   "new title",
 		Content: "new content",
@@ -120,7 +135,7 @@ func (s *ArticleDBTestSuite) TestArticleDB_Create() {
 }
 
 func (s *ArticleDBTestSuite) TestArticleDB_Search() {
-	result, err := s.repo.Search(context.TODO(), "999", "")
+	result, err := s.articleDAO.Search(context.TODO(), "999", "")
 	assert.NoError(s.T(), err)
 
 	assert.NotNil(s.T(), result)
@@ -128,7 +143,7 @@ func (s *ArticleDBTestSuite) TestArticleDB_Search() {
 	assert.Equal(s.T(), "seeded title 999", result[0].Title)
 	assert.Equal(s.T(), "seeded content 999", result[0].Content)
 
-	result, err = s.repo.Search(context.TODO(), "", "999")
+	result, err = s.articleDAO.Search(context.TODO(), "", "999")
 	assert.NoError(s.T(), err)
 
 	assert.NotNil(s.T(), result)

@@ -73,7 +73,7 @@ func (s *ArticleHandlerTestSuite) SetupTest() {
 	require.NoError(s.T(), err)
 
 	// Seed database.
-	script, err := os.ReadFile("../scripts/seed_articles.sql")
+	script, err := os.ReadFile("../scripts/seed_db.sql")
 	require.NoError(s.T(), err)
 
 	err = s.db.Exec(string(script)).Error
@@ -90,11 +90,11 @@ func (s *ArticleHandlerTestSuite) SetupTest() {
 }
 
 func (s *ArticleHandlerTestSuite) TearDownTest() {
-	s.deleteAllArticles()
+	s.cleanDB()
 }
 
-func (s *ArticleHandlerTestSuite) deleteAllArticles() {
-	script, err := os.ReadFile("../scripts/delete_articles.sql")
+func (s *ArticleHandlerTestSuite) cleanDB() {
+	script, err := os.ReadFile("../scripts/clean_db.sql")
 	require.NoError(s.T(), err)
 
 	err = s.db.Exec(string(script)).Error
