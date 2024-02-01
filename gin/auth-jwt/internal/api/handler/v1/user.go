@@ -52,6 +52,8 @@ func (h *UserHandler) HandleGetUser(ctx *gin.Context) {
 		return
 	}
 
+	// TODO: check JWT claim userID matches userID here.
+
 	user, err := h.svc.GetUser(ctx.Request.Context(), uint(userID))
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFound) {

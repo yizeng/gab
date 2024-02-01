@@ -101,7 +101,7 @@ func (h *AuthHandler) HandleLogin(ctx *gin.Context) {
 
 	user, err := h.svc.Login(ctx.Request.Context(), req.Email, req.Password)
 	if err != nil {
-		if errors.Is(err, service.ErrWrongCredentials) {
+		if errors.Is(err, service.ErrUserNotFound) || errors.Is(err, service.ErrWrongPassword) {
 			response.RenderError(ctx, response.NewWrongCredentials(err))
 
 			return

@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	ErrUserEmailExists  = repository.ErrUserEmailExists
-	ErrWrongCredentials = errors.New("wrong credentials")
+	ErrUserEmailExists = repository.ErrUserEmailExists
+	ErrWrongPassword   = errors.New("wrong password")
 )
 
 type AuthUserRepository interface {
@@ -50,14 +50,14 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (domain
 	user, err := s.repo.FindByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
-			return domain.User{}, ErrWrongCredentials
+			return domain.User{}, ErrUserNotFound
 		}
 
 		return domain.User{}, fmt.Errorf("s.repo.FindByEmail -> %w", err)
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return domain.User{}, ErrWrongCredentials
+		return domain.User{}, ErrWrongPassword
 	}
 
 	return user, nil

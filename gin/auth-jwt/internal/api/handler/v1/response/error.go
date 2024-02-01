@@ -51,10 +51,12 @@ func NewNotFound(resourceName, fieldName string, fieldValue any) *ErrResponse {
 }
 
 func NewWrongCredentials(err error) *ErrResponse {
+	zap.L().Debug("wrong credentials: " + err.Error())
+
 	return &ErrResponse{
 		StackErr:   nil, // here we don't want to log err to StackErr.
 		StatusCode: http.StatusUnauthorized,
-		ErrorMsg:   err.Error(),
+		ErrorMsg:   "wrong credentials",
 	}
 }
 
