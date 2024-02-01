@@ -32,19 +32,10 @@ func NewServer(conf *config.AppConfig, db *gorm.DB) *Server {
 
 	s.MountMiddlewares()
 
-	articleHandler := initArticleHandler(db)
+	articleHandler := s.initArticleHandler(db)
 	s.MountHandlers(articleHandler)
 
 	return s
-}
-
-func initArticleHandler(db *gorm.DB) *v1.ArticleHandler {
-	articleDAO := dao.NewArticleDAO(db)
-	articleRepo := repository.NewArticleRepository(articleDAO)
-	articleSvc := service.NewArticleService(articleRepo)
-	articleHandler := v1.NewArticleHandler(articleSvc)
-
-	return articleHandler
 }
 
 func (s *Server) MountMiddlewares() {
@@ -75,4 +66,13 @@ func (s *Server) MountHandlers(articleHandler *v1.ArticleHandler) {
 	docs.SwaggerInfo.Description = "This is an example of Go API with Gin."
 	docs.SwaggerInfo.Version = "1.0"
 	s.Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+}
+
+func (s *Server) initArticleHandler(db *gorm.DB) *v1.ArticleHandler {
+	articleDAO := dao.NewArticleDAO(db)
+	articleRepo := repository.NewArticleRepository(articleDAO)
+	articleSvc := service.NewArticleService(articleRepo)
+	articleHandler := v1.NewArticleHandler(articleSvc)
+
+	return articleHandler
 }

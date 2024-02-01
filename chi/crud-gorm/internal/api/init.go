@@ -34,19 +34,10 @@ func NewServer(conf *config.AppConfig, db *gorm.DB) *Server {
 
 	s.MountMiddlewares()
 
-	articleHandler := initArticleHandler(db)
+	articleHandler := s.initArticleHandler(db)
 	s.MountHandlers(articleHandler)
 
 	return s
-}
-
-func initArticleHandler(db *gorm.DB) *v1.ArticleHandler {
-	articleDAO := dao.NewArticleDAO(db)
-	articleRepo := repository.NewArticleRepository(articleDAO)
-	articleSvc := service.NewArticleService(articleRepo)
-	articleHandler := v1.NewArticleHandler(articleSvc)
-
-	return articleHandler
 }
 
 func (s *Server) MountMiddlewares() {
@@ -82,6 +73,15 @@ func (s *Server) MountHandlers(articleHandler *v1.ArticleHandler) {
 	s.Router.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	s.printAllRoutes()
+}
+
+func (s *Server) initArticleHandler(db *gorm.DB) *v1.ArticleHandler {
+	articleDAO := dao.NewArticleDAO(db)
+	articleRepo := repository.NewArticleRepository(articleDAO)
+	articleSvc := service.NewArticleService(articleRepo)
+	articleHandler := v1.NewArticleHandler(articleSvc)
+
+	return articleHandler
 }
 
 func (s *Server) printAllRoutes() {
