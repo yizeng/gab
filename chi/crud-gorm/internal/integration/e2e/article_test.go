@@ -37,6 +37,7 @@ var (
 		Title:   "seeded title 888",
 		Content: "seeded content 888",
 	}
+	testDBErr = errors.New("DB error")
 )
 
 type ArticleHandlerTestSuite struct {
@@ -97,6 +98,12 @@ func (s *ArticleHandlerTestSuite) cleanDB() {
 	require.NoError(s.T(), err)
 }
 
+func (s *ArticleHandlerTestSuite) createDBError() {
+	// Create/fake a DB error by dropping the articles table.
+	err := s.db.Exec(`DROP TABLE "articles"`).Error
+	require.NoError(s.T(), err)
+}
+
 func TestArticleHandler(t *testing.T) {
 	suite.Run(t, new(ArticleHandlerTestSuite))
 }
@@ -112,12 +119,14 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 	}
 	tests := []struct {
 		name    string
+		setup   func()
 		args    args
 		want    want
 		wantErr bool
 	}{
 		{
-			name: "201 Created",
+			name:  "201 Created",
+			setup: func() {},
 			args: args{
 				buildReqBody: func() string {
 					article := request.CreateArticleRequest{
@@ -144,7 +153,8 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 			wantErr: false,
 		},
 		{
-			name: "400 Bad Request - Missing user_id, Title too long, Content too long",
+			name:  "400 Bad Request - Missing user_id, Title too long, Content too long",
+			setup: func() {},
 			args: args{
 				buildReqBody: func() string {
 					article := request.CreateArticleRequest{
@@ -166,7 +176,8 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 			wantErr: true,
 		},
 		{
-			name: "400 Bad Request - invalid JSON",
+			name:  "400 Bad Request - invalid JSON",
+			setup: func() {},
 			args: args{
 				buildReqBody: func() string {
 					return "["
@@ -180,7 +191,8 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 			wantErr: true,
 		},
 		{
-			name: "400 Bad Request - Already exists",
+			name:  "400 Bad Request - Already exists",
+			setup: func() {},
 			args: args{
 				buildReqBody: func() string {
 					article := request.CreateArticleRequest{
@@ -202,9 +214,38 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 			},
 			wantErr: true,
 		},
+		{
+			name: "500 - DB error",
+			setup: func() {
+				s.createDBError()
+			},
+			args: args{
+				buildReqBody: func() string {
+					article := request.CreateArticleRequest{
+						UserID:  123,
+						Title:   "title 1",
+						Content: "content 1",
+					}
+
+					body, err := json.Marshal(article)
+					require.NoError(s.T(), err)
+
+					return string(body)
+				},
+			},
+			want: want{
+				article:  domain.Article{},
+				respCode: http.StatusInternalServerError,
+				err:      response.NewInternalServerError(testDBErr),
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		s.T().Run(tt.name, func(t *testing.T) {
+			// Setup tests when present.
+			tt.setup()
+
 			// Prepare Request.
 			body := tt.args.buildReqBody()
 			req, err := http.NewRequest("POST", "/api/v1/articles", strings.NewReader(body))
@@ -248,12 +289,14 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 	}
 	tests := []struct {
 		name    string
+		setup   func()
 		args    args
 		want    want
 		wantErr bool
 	}{
 		{
-			name: "200 OK",
+			name:  "200 OK",
+			setup: func() {},
 			args: args{
 				articleID: "999",
 			},
@@ -265,7 +308,8 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 			wantErr: false,
 		},
 		{
-			name: "404 Not Found - articleID is not found",
+			name:  "404 Not Found - articleID is not found",
+			setup: func() {},
 			args: args{
 				articleID: "1",
 			},
@@ -277,7 +321,8 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 			wantErr: true,
 		},
 		{
-			name: "404 Not Found - articleID is negative",
+			name:  "404 Not Found - articleID is negative",
+			setup: func() {},
 			args: args{
 				articleID: "-1",
 			},
@@ -289,7 +334,8 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 			wantErr: true,
 		},
 		{
-			name: "400 Bad Request - invalid articleID",
+			name:  "400 Bad Request - invalid articleID",
+			setup: func() {},
 			args: args{
 				articleID: "abc",
 			},
@@ -300,9 +346,27 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 			},
 			wantErr: true,
 		},
+		{
+			name: "500 - DB error",
+			setup: func() {
+				s.createDBError()
+			},
+			args: args{
+				articleID: "999",
+			},
+			want: want{
+				article:  domain.Article{},
+				respCode: http.StatusInternalServerError,
+				err:      response.NewInternalServerError(testDBErr),
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		s.T().Run(tt.name, func(t *testing.T) {
+			// Setup tests when present.
+			tt.setup()
+
 			// Prepare Request.
 			req, err := http.NewRequest("GET", "/api/v1/articles/"+tt.args.articleID, nil)
 			require.NoError(t, err)
@@ -448,10 +512,25 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleListArticles() {
 			},
 			wantErr: true,
 		},
+		{
+			name: "500 - DB error",
+			setup: func() {
+				s.createDBError()
+			},
+			args: args{
+				query: "?page=1&per_page=1",
+			},
+			want: want{
+				articles: []domain.Article{},
+				respCode: http.StatusInternalServerError,
+				err:      response.NewInternalServerError(testDBErr),
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		s.T().Run(tt.name, func(t *testing.T) {
-			// Setup the tests.
+			// Setup tests when present.
 			tt.setup()
 
 			// Prepare Request.
@@ -502,12 +581,14 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleSearchArticles() {
 	}
 	tests := []struct {
 		name    string
+		setup   func()
 		args    args
 		want    want
 		wantErr bool
 	}{
 		{
-			name: "200 OK - by title",
+			name:  "200 OK - by title",
+			setup: func() {},
 			args: args{
 				query: "title=999",
 			},
@@ -521,7 +602,8 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleSearchArticles() {
 			wantErr: false,
 		},
 		{
-			name: "200 OK - by content",
+			name:  "200 OK - by content",
+			setup: func() {},
 			args: args{
 				query: "content=999",
 			},
@@ -535,7 +617,8 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleSearchArticles() {
 			wantErr: false,
 		},
 		{
-			name: "200 OK - When there are no results",
+			name:  "200 OK - When there are no results",
+			setup: func() {},
 			args: args{
 				query: "title=no-title&content=no-content",
 			},
@@ -547,7 +630,8 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleSearchArticles() {
 			wantErr: false,
 		},
 		{
-			name: "200 OK - No query parameters",
+			name:  "200 OK - No query parameters",
+			setup: func() {},
 			args: args{
 				query: "",
 			},
@@ -561,9 +645,27 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleSearchArticles() {
 			},
 			wantErr: false,
 		},
+		{
+			name: "500 - DB error",
+			setup: func() {
+				s.createDBError()
+			},
+			args: args{
+				query: "",
+			},
+			want: want{
+				articles: nil,
+				respCode: http.StatusInternalServerError,
+				err:      response.NewInternalServerError(testDBErr),
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		s.T().Run(tt.name, func(t *testing.T) {
+			// Setup tests when present.
+			tt.setup()
+
 			// Prepare Request.
 			req, err := http.NewRequest("GET", "/api/v1/articles/search?"+tt.args.query, nil)
 			require.NoError(t, err)
