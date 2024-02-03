@@ -31,12 +31,12 @@ func NewCountryHandler(svc CountryService) *CountryHandler {
 // @Produce      json
 // @Param        request   body      request.SumPopulationByState true "request body"
 // @Success      200      {object}   []domain.State
-// @Failure      400      {object}   response.ErrResponse
+// @Failure      400      {object}   response.Err
 // @Router       /countries/sum-population-by-state [post]
 func (h *CountryHandler) HandleSumPopulationByState(ctx *gin.Context) {
 	req := request.SumPopulationByState{}
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.RenderError(ctx, response.NewBadRequest(err))
+		response.RenderErr(ctx, response.ErrBadRequest(err))
 
 		return
 	}

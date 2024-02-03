@@ -31,13 +31,13 @@ func NewCountryHandler(svc CountryService) *CountryHandler {
 // @Produce      json
 // @Param        request   body      request.SumPopulationByState true "request body"
 // @Success      200      {object}   []domain.State
-// @Failure      400      {object}   response.ErrResponse
-// @Failure      500      {object}   response.ErrResponse
+// @Failure      400      {object}   response.Err
+// @Failure      500      {object}   response.Err
 // @Router       /countries/sum-population-by-state [post]
 func (h *CountryHandler) HandleSumPopulationByState(w http.ResponseWriter, r *http.Request) {
 	req := request.SumPopulationByState{}
 	if err := render.Bind(r, &req); err != nil {
-		_ = render.Render(w, r, response.NewBadRequest(err))
+		_ = render.Render(w, r, response.ErrBadRequest(err))
 
 		return
 	}
@@ -45,7 +45,7 @@ func (h *CountryHandler) HandleSumPopulationByState(w http.ResponseWriter, r *ht
 	totalPopulation := h.svc.SumPopulationByState(r.Context(), req.States)
 
 	if err := render.Render(w, r, response.NewSumPopulationByStateResult(totalPopulation)); err != nil {
-		_ = render.Render(w, r, response.NewInternalServerError(err))
+		_ = render.Render(w, r, response.ErrInternalServerError(err))
 
 		return
 	}

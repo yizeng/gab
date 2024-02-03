@@ -22,7 +22,7 @@ func Pagination(next http.Handler) http.Handler {
 		pageNumber := r.URL.Query().Get(PageQueryKey)
 		parsedPageNumber, err := parsePageNumber(pageNumber)
 		if err != nil {
-			render.Render(w, r, response.NewInvalidInput(PageQueryKey, pageNumber))
+			render.Render(w, r, response.ErrInvalidInput(PageQueryKey, pageNumber))
 
 			return
 		}
@@ -30,7 +30,7 @@ func Pagination(next http.Handler) http.Handler {
 		perPage := r.URL.Query().Get(PerPageQueryKey)
 		parsedPerPage, err := parsePerPage(perPage)
 		if err != nil {
-			render.Render(w, r, response.NewInvalidInput(PerPageQueryKey, perPage))
+			render.Render(w, r, response.ErrInvalidInput(PerPageQueryKey, perPage))
 
 			return
 		}

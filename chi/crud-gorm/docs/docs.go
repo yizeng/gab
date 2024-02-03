@@ -51,7 +51,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrResponse"
+                            "$ref": "#/definitions/response.Err"
                         }
                     }
                 }
@@ -85,13 +85,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrResponse"
+                            "$ref": "#/definitions/response.Err"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrResponse"
+                            "$ref": "#/definitions/response.Err"
                         }
                     }
                 }
@@ -133,7 +133,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrResponse"
+                            "$ref": "#/definitions/response.Err"
                         }
                     }
                 }
@@ -167,19 +167,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrResponse"
+                            "$ref": "#/definitions/response.Err"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrResponse"
+                            "$ref": "#/definitions/response.Err"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrResponse"
+                            "$ref": "#/definitions/response.Err"
                         }
                     }
                 }
@@ -229,7 +229,7 @@ const docTemplate = `{
                 }
             }
         },
-        "response.ErrResponse": {
+        "response.Err": {
             "type": "object",
             "properties": {
                 "error": {
@@ -238,10 +238,6 @@ const docTemplate = `{
                 },
                 "error_code": {
                     "description": "application-specific error code",
-                    "type": "integer"
-                },
-                "status": {
-                    "description": "http response status code",
                     "type": "integer"
                 }
             }

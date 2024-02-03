@@ -20,7 +20,7 @@ func Paginate() gin.HandlerFunc {
 		pageNumber := ctx.Query(PageQueryKey)
 		parsedPageNumber, err := parsePageNumber(pageNumber)
 		if err != nil {
-			response.RenderError(ctx, response.NewInvalidInput(PageQueryKey, pageNumber))
+			response.RenderErr(ctx, response.ErrInvalidInput(PageQueryKey, pageNumber))
 
 			return
 		}
@@ -28,7 +28,7 @@ func Paginate() gin.HandlerFunc {
 		perPage := ctx.Query(PerPageQueryKey)
 		parsedPerPage, err := parsePerPage(perPage)
 		if err != nil {
-			response.RenderError(ctx, response.NewInvalidInput(PerPageQueryKey, perPage))
+			response.RenderErr(ctx, response.ErrInvalidInput(PerPageQueryKey, perPage))
 
 			return
 		}

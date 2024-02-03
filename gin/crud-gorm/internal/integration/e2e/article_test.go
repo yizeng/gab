@@ -119,7 +119,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 	type want struct {
 		article  domain.Article
 		respCode int
-		err      *response.ErrResponse
+		err      *response.Err
 	}
 	tests := []struct {
 		name    string
@@ -175,7 +175,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 			want: want{
 				article:  domain.Article{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewBadRequest(errors.New("content: the length must be between 1 and 5000; title: the length must be between 1 and 128; user_id: cannot be blank.")),
+				err:      response.ErrBadRequest(errors.New("content: the length must be between 1 and 5000; title: the length must be between 1 and 128; user_id: cannot be blank.")),
 			},
 			wantErr: true,
 		},
@@ -190,7 +190,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 			want: want{
 				article:  domain.Article{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewBadRequest(errors.New("unexpected EOF")),
+				err:      response.ErrBadRequest(errors.New("unexpected EOF")),
 			},
 			wantErr: true,
 		},
@@ -214,7 +214,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 			want: want{
 				article:  domain.Article{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewBadRequest(errors.New("article already exists")),
+				err:      response.ErrBadRequest(errors.New("article already exists")),
 			},
 			wantErr: true,
 		},
@@ -240,7 +240,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 			want: want{
 				article:  domain.Article{},
 				respCode: http.StatusInternalServerError,
-				err:      response.NewInternalServerError(testDBErr),
+				err:      response.ErrInternalServerError(testDBErr),
 			},
 			wantErr: true,
 		},
@@ -262,11 +262,10 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleCreateArticle() {
 			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
-				var result response.ErrResponse
+				var result response.Err
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
 				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
 				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {
@@ -289,7 +288,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 	type want struct {
 		article  domain.Article
 		respCode int
-		err      *response.ErrResponse
+		err      *response.Err
 	}
 	tests := []struct {
 		name    string
@@ -320,7 +319,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 			want: want{
 				article:  domain.Article{},
 				respCode: http.StatusNotFound,
-				err:      response.NewNotFound("article", "ID", "1"),
+				err:      response.ErrNotFound("article", "ID", "1"),
 			},
 			wantErr: true,
 		},
@@ -333,7 +332,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 			want: want{
 				article:  domain.Article{},
 				respCode: http.StatusNotFound,
-				err:      response.NewNotFound("article", "ID", "-1"),
+				err:      response.ErrNotFound("article", "ID", "-1"),
 			},
 			wantErr: true,
 		},
@@ -346,7 +345,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 			want: want{
 				article:  domain.Article{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewInvalidInput("articleID", "abc"),
+				err:      response.ErrInvalidInput("articleID", "abc"),
 			},
 			wantErr: true,
 		},
@@ -361,7 +360,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 			want: want{
 				article:  domain.Article{},
 				respCode: http.StatusInternalServerError,
-				err:      response.NewInternalServerError(testDBErr),
+				err:      response.ErrInternalServerError(testDBErr),
 			},
 			wantErr: true,
 		},
@@ -382,11 +381,10 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleGetArticle() {
 			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
-				var result response.ErrResponse
+				var result response.Err
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
 				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
 				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {
@@ -409,7 +407,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleListArticles() {
 	type want struct {
 		articles []domain.Article
 		respCode int
-		err      *response.ErrResponse
+		err      *response.Err
 	}
 	tests := []struct {
 		name    string
@@ -473,7 +471,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleListArticles() {
 			want: want{
 				articles: []domain.Article{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewInvalidInput("page", "abc"),
+				err:      response.ErrInvalidInput("page", "abc"),
 			},
 			wantErr: true,
 		},
@@ -486,7 +484,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleListArticles() {
 			want: want{
 				articles: []domain.Article{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewInvalidInput("page", "-123"),
+				err:      response.ErrInvalidInput("page", "-123"),
 			},
 			wantErr: true,
 		},
@@ -499,7 +497,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleListArticles() {
 			want: want{
 				articles: []domain.Article{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewInvalidInput("per_page", "abc"),
+				err:      response.ErrInvalidInput("per_page", "abc"),
 			},
 			wantErr: true,
 		},
@@ -512,7 +510,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleListArticles() {
 			want: want{
 				articles: []domain.Article{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewInvalidInput("per_page", "-123"),
+				err:      response.ErrInvalidInput("per_page", "-123"),
 			},
 			wantErr: true,
 		},
@@ -527,7 +525,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleListArticles() {
 			want: want{
 				articles: []domain.Article{},
 				respCode: http.StatusInternalServerError,
-				err:      response.NewInternalServerError(testDBErr),
+				err:      response.ErrInternalServerError(testDBErr),
 			},
 			wantErr: true,
 		},
@@ -548,11 +546,10 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleListArticles() {
 			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
-				var result response.ErrResponse
+				var result response.Err
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
 				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
 				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {
@@ -581,7 +578,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleSearchArticles() {
 	type want struct {
 		articles []domain.Article
 		respCode int
-		err      *response.ErrResponse
+		err      *response.Err
 	}
 	tests := []struct {
 		name    string
@@ -660,7 +657,7 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleSearchArticles() {
 			want: want{
 				articles: nil,
 				respCode: http.StatusInternalServerError,
-				err:      response.NewInternalServerError(testDBErr),
+				err:      response.ErrInternalServerError(testDBErr),
 			},
 			wantErr: true,
 		},
@@ -681,11 +678,10 @@ func (s *ArticleHandlerTestSuite) TestArticleHandler_HandleSearchArticles() {
 			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
-				var result response.ErrResponse
+				var result response.Err
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
 				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
 				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {

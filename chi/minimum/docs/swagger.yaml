@@ -18,16 +18,13 @@ definitions:
     required:
     - states
     type: object
-  response.ErrResponse:
+  response.Err:
     properties:
       error:
         description: user-facing error message
         type: string
       error_code:
         description: application-specific error code
-        type: integer
-      status:
-        description: http response status code
         type: integer
     type: object
 info:
@@ -54,11 +51,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.ErrResponse'
+            $ref: '#/definitions/response.Err'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/response.ErrResponse'
+            $ref: '#/definitions/response.Err'
       summary: Sum the total population by state
       tags:
       - countries

@@ -70,7 +70,7 @@ func TestHandleCalculateTotalPopulation(t *testing.T) {
 			},
 			want: want{
 				respCode: http.StatusBadRequest,
-				body:     `{"status":400,"error":"unexpected EOF"}`,
+				body:     `{"error":"unexpected EOF"}`,
 			},
 		},
 		{
@@ -82,7 +82,7 @@ func TestHandleCalculateTotalPopulation(t *testing.T) {
 			},
 			want: want{
 				respCode: http.StatusBadRequest,
-				body:     `{"status":400,"error":"states: (name: cannot be blank.)."}`,
+				body:     `{"error":"states: (name: cannot be blank.)."}`,
 			},
 		},
 	}

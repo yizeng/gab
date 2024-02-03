@@ -77,7 +77,7 @@ func TestHandleCalculateTotalPopulation(t *testing.T) {
 			},
 			want: want{
 				respCode: http.StatusBadRequest,
-				body:     `{"status":400,"error":"unexpected EOF"}`,
+				body:     `{"error":"unexpected EOF"}`,
 			},
 		},
 		{
@@ -89,7 +89,7 @@ func TestHandleCalculateTotalPopulation(t *testing.T) {
 			},
 			want: want{
 				respCode: http.StatusBadRequest,
-				body:     `{"status":400,"error":"Key: 'SumPopulationByState.States[0].Name' Error:Field validation for 'Name' failed on the 'required' tag"}`,
+				body:     `{"error":"Key: 'SumPopulationByState.States[0].Name' Error:Field validation for 'Name' failed on the 'required' tag"}`,
 			},
 		},
 	}
