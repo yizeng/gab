@@ -39,20 +39,20 @@ func NewArticleHandler(svc ArticleService) *ArticleHandler {
 // @Produce      json
 // @Param        request   body      request.CreateArticleRequest true "request body"
 // @Success      200      {object}   domain.Article
-// @Failure      400      {object}   response.ErrResponse
-// @Success      401      {object}   response.ErrResponse
-// @Failure      500      {object}   response.ErrResponse
+// @Failure      400      {object}   response.Err
+// @Success      401      {object}   response.Err
+// @Failure      500      {object}   response.Err
 // @Router       /articles [post]
 func (h *ArticleHandler) HandleCreateArticle(ctx *gin.Context) {
 	req := request.CreateArticleRequest{}
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.RenderError(ctx, response.NewBadRequest(err))
+		response.RenderErr(ctx, response.ErrBadRequest(err))
 
 		return
 	}
 
 	if err := req.Validate(); err != nil {
-		response.RenderError(ctx, response.NewBadRequest(err))
+		response.RenderErr(ctx, response.ErrBadRequest(err))
 
 		return
 	}
@@ -64,13 +64,13 @@ func (h *ArticleHandler) HandleCreateArticle(ctx *gin.Context) {
 	})
 	if err != nil {
 		if errors.Is(err, service.ErrArticleDuplicated) {
-			response.RenderError(ctx, response.NewBadRequest(service.ErrArticleDuplicated))
+			response.RenderErr(ctx, response.ErrBadRequest(service.ErrArticleDuplicated))
 
 			return
 		}
 
 		err = fmt.Errorf("v1.HandleCreateArticle -> h.svc.CreateArticle -> %w", err)
-		response.RenderError(ctx, response.NewInternalServerError(err))
+		response.RenderErr(ctx, response.ErrInternalServerError(err))
 
 		return
 	}
@@ -84,22 +84,22 @@ func (h *ArticleHandler) HandleCreateArticle(ctx *gin.Context) {
 // @Produce      json
 // @Param        articleID   path    int  true "article ID"
 // @Success      200      {object}   domain.Article
-// @Failure      400      {object}   response.ErrResponse
-// @Success      401      {object}   response.ErrResponse
-// @Failure      404      {object}   response.ErrResponse
-// @Failure      500      {object}   response.ErrResponse
+// @Failure      400      {object}   response.Err
+// @Success      401      {object}   response.Err
+// @Failure      404      {object}   response.Err
+// @Failure      500      {object}   response.Err
 // @Router       /articles/{articleID} [get]
 func (h *ArticleHandler) HandleGetArticle(ctx *gin.Context) {
 	rawArticleID := ctx.Param("articleID")
 	articleID, err := strconv.Atoi(rawArticleID)
 	if err != nil {
-		response.RenderError(ctx, response.NewInvalidInput("articleID", rawArticleID))
+		response.RenderErr(ctx, response.ErrInvalidInput("articleID", rawArticleID))
 
 		return
 	}
 
 	if articleID <= 0 {
-		response.RenderError(ctx, response.NewNotFound("article", "ID", articleID))
+		response.RenderErr(ctx, response.ErrNotFound("article", "ID", articleID))
 
 		return
 	}
@@ -107,13 +107,13 @@ func (h *ArticleHandler) HandleGetArticle(ctx *gin.Context) {
 	article, err := h.svc.GetArticle(ctx.Request.Context(), uint(articleID))
 	if err != nil {
 		if errors.Is(err, service.ErrArticleNotFound) {
-			response.RenderError(ctx, response.NewNotFound("article", "ID", articleID))
+			response.RenderErr(ctx, response.ErrNotFound("article", "ID", articleID))
 
 			return
 		}
 
 		err = fmt.Errorf("v1.HandleGetArticle -> h.svc.GetArticle -> %w", err)
-		response.RenderError(ctx, response.NewInternalServerError(err))
+		response.RenderErr(ctx, response.ErrInternalServerError(err))
 
 		return
 	}
@@ -128,19 +128,19 @@ func (h *ArticleHandler) HandleGetArticle(ctx *gin.Context) {
 // @Param        page     query      int  false  "which page to load. Default to 1 if empty."
 // @Param        per_page query      int  false  "how many items per page. Default to 10 if empty."
 // @Success      200      {object}   []domain.Article
-// @Success      401      {object}   response.ErrResponse
-// @Failure      500      {object}   response.ErrResponse
+// @Success      401      {object}   response.Err
+// @Failure      500      {object}   response.Err
 // @Router       /articles [get]
 func (h *ArticleHandler) HandleListArticles(ctx *gin.Context) {
 	page, err := parsePaginationQuery(ctx, middleware.PageQueryKey)
 	if err != nil {
-		response.RenderError(ctx, response.NewInternalServerError(err))
+		response.RenderErr(ctx, response.ErrInternalServerError(err))
 
 		return
 	}
 	perPage, err := parsePaginationQuery(ctx, middleware.PerPageQueryKey)
 	if err != nil {
-		response.RenderError(ctx, response.NewInternalServerError(err))
+		response.RenderErr(ctx, response.ErrInternalServerError(err))
 
 		return
 	}
@@ -148,7 +148,7 @@ func (h *ArticleHandler) HandleListArticles(ctx *gin.Context) {
 	articles, err := h.svc.ListArticles(ctx.Request.Context(), page, perPage)
 	if err != nil {
 		err = fmt.Errorf("v1.HandleListArticles -> h.svc.ListArticles -> %w", err)
-		response.RenderError(ctx, response.NewInternalServerError(err))
+		response.RenderErr(ctx, response.ErrInternalServerError(err))
 
 		return
 	}
@@ -163,8 +163,8 @@ func (h *ArticleHandler) HandleListArticles(ctx *gin.Context) {
 // @Param        title    query     string  false  "search by title"
 // @Param        content  query     string  false  "search by content"
 // @Success      200      {object}   []domain.Article
-// @Success      401      {object}   response.ErrResponse
-// @Failure      500      {object}   response.ErrResponse
+// @Success      401      {object}   response.Err
+// @Failure      500      {object}   response.Err
 // @Router       /articles/search [get]
 func (h *ArticleHandler) HandleSearchArticles(ctx *gin.Context) {
 	titleParam := ctx.Query("title")
@@ -173,7 +173,7 @@ func (h *ArticleHandler) HandleSearchArticles(ctx *gin.Context) {
 	articles, err := h.svc.SearchArticles(ctx.Request.Context(), titleParam, contentParam)
 	if err != nil {
 		err = fmt.Errorf("v1.HandleSearchArticles -> h.svc.SearchArticles -> %w", err)
-		response.RenderError(ctx, response.NewInternalServerError(err))
+		response.RenderErr(ctx, response.ErrInternalServerError(err))
 
 		return
 	}

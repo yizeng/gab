@@ -34,20 +34,20 @@ func NewUserHandler(svc UserService) *UserHandler {
 // @Produce      json
 // @Param        userID   path       int  true "user ID"
 // @Success      200      {object}   domain.User
-// @Failure      401      {object}   response.ErrResponse
-// @Failure      500      {object}   response.ErrResponse
+// @Failure      401      {object}   response.Err
+// @Failure      500      {object}   response.Err
 // @Router       /users/{userID} [get]
 func (h *UserHandler) HandleGetUser(ctx *gin.Context) {
 	rawUserID := ctx.Param("userID")
 	userID, err := strconv.Atoi(rawUserID)
 	if err != nil {
-		response.RenderError(ctx, response.NewInvalidInput("userID", rawUserID))
+		response.RenderErr(ctx, response.ErrInvalidInput("userID", rawUserID))
 
 		return
 	}
 
 	if userID <= 0 {
-		response.RenderError(ctx, response.NewNotFound("user", "ID", userID))
+		response.RenderErr(ctx, response.ErrNotFound("user", "ID", userID))
 
 		return
 	}
@@ -57,13 +57,13 @@ func (h *UserHandler) HandleGetUser(ctx *gin.Context) {
 	user, err := h.svc.GetUser(ctx.Request.Context(), uint(userID))
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFound) {
-			response.RenderError(ctx, response.NewNotFound("user", "ID", userID))
+			response.RenderErr(ctx, response.ErrNotFound("user", "ID", userID))
 
 			return
 		}
 
 		err = fmt.Errorf("v1.HandleGetUser -> h.svc.GetUser -> %w", err)
-		response.RenderError(ctx, response.NewInternalServerError(err))
+		response.RenderErr(ctx, response.ErrInternalServerError(err))
 
 		return
 	}

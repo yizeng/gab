@@ -24,7 +24,7 @@ func (a *Authenticator) VerifyJWT() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		claims, err := a.extractClaims(ctx)
 		if err != nil {
-			response.RenderError(ctx, response.NewJWTVerificationError(err))
+			response.RenderErr(ctx, response.ErrJWTUnverified(err))
 
 			return
 		}

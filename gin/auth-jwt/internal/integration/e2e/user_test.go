@@ -108,7 +108,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 	type want struct {
 		user     domain.User
 		respCode int
-		err      *response.ErrResponse
+		err      *response.Err
 	}
 	tests := []struct {
 		name    string
@@ -152,7 +152,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusUnauthorized,
-				err:      response.NewJWTVerificationError(errors.New("any message")),
+				err:      response.ErrJWTUnverified(errors.New("any message")),
 			},
 			wantErr: true,
 		},
@@ -170,7 +170,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusUnauthorized,
-				err:      response.NewJWTVerificationError(errors.New("any message")),
+				err:      response.ErrJWTUnverified(errors.New("any message")),
 			},
 			wantErr: true,
 		},
@@ -188,7 +188,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusUnauthorized,
-				err:      response.NewJWTVerificationError(errors.New("any message")),
+				err:      response.ErrJWTUnverified(errors.New("any message")),
 			},
 			wantErr: true,
 		},
@@ -206,7 +206,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusUnauthorized,
-				err:      response.NewJWTVerificationError(errors.New("any message")),
+				err:      response.ErrJWTUnverified(errors.New("any message")),
 			},
 			wantErr: true,
 		},
@@ -224,7 +224,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusUnauthorized,
-				err:      response.NewJWTVerificationError(errors.New("any message")),
+				err:      response.ErrJWTUnverified(errors.New("any message")),
 			},
 			wantErr: true,
 		},
@@ -245,7 +245,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusUnauthorized,
-				err:      response.NewJWTVerificationError(errors.New("any message")),
+				err:      response.ErrJWTUnverified(errors.New("any message")),
 			},
 			wantErr: true,
 		},
@@ -266,7 +266,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusUnauthorized,
-				err:      response.NewJWTVerificationError(errors.New("any message")),
+				err:      response.ErrJWTUnverified(errors.New("any message")),
 			},
 			wantErr: true,
 		},
@@ -287,7 +287,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewInvalidInput("userID", "abc"),
+				err:      response.ErrInvalidInput("userID", "abc"),
 			},
 			wantErr: true,
 		},
@@ -308,7 +308,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusNotFound,
-				err:      response.NewNotFound("user", "ID", "-123"),
+				err:      response.ErrNotFound("user", "ID", "-123"),
 			},
 			wantErr: true,
 		},
@@ -331,7 +331,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusInternalServerError,
-				err:      response.NewInternalServerError(testDBErr),
+				err:      response.ErrInternalServerError(testDBErr),
 			},
 			wantErr: true,
 		},
@@ -357,11 +357,10 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
-				var result response.ErrResponse
+				var result response.Err
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
 				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
 				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {

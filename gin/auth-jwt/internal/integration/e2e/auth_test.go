@@ -114,7 +114,7 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleSignup() {
 	type want struct {
 		user     domain.User
 		respCode int
-		err      *response.ErrResponse
+		err      *response.Err
 	}
 	tests := []struct {
 		name    string
@@ -157,7 +157,7 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleSignup() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewBadRequest(errors.New("confirm_password: cannot be blank; email: cannot be blank; password: cannot be blank.")),
+				err:      response.ErrBadRequest(errors.New("confirm_password: cannot be blank; email: cannot be blank; password: cannot be blank.")),
 			},
 			wantErr: true,
 		},
@@ -179,7 +179,7 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleSignup() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewBadRequest(errors.New("the password must be at least 8 characters and contain 1 letter, 1 number and 1 symbol")),
+				err:      response.ErrBadRequest(errors.New("the password must be at least 8 characters and contain 1 letter, 1 number and 1 symbol")),
 			},
 			wantErr: true,
 		},
@@ -201,7 +201,7 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleSignup() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewBadRequest(errors.New("confirm password doesn't match the password")),
+				err:      response.ErrBadRequest(errors.New("confirm password doesn't match the password")),
 			},
 			wantErr: true,
 		},
@@ -219,7 +219,7 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleSignup() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewBadRequest(errors.New("user already exists")),
+				err:      response.ErrBadRequest(errors.New("user already exists")),
 			},
 			wantErr: true,
 		},
@@ -234,7 +234,7 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleSignup() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewBadRequest(errors.New("unexpected EOF")),
+				err:      response.ErrBadRequest(errors.New("unexpected EOF")),
 			},
 			wantErr: true,
 		},
@@ -254,7 +254,7 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleSignup() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusInternalServerError,
-				err:      response.NewInternalServerError(testDBErr),
+				err:      response.ErrInternalServerError(testDBErr),
 			},
 			wantErr: true,
 		},
@@ -276,11 +276,10 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleSignup() {
 			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
-				var result response.ErrResponse
+				var result response.Err
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
 				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
 				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {
@@ -302,7 +301,7 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleLogin() {
 	type want struct {
 		user     domain.User
 		respCode int
-		err      *response.ErrResponse
+		err      *response.Err
 	}
 	tests := []struct {
 		name    string
@@ -347,7 +346,7 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleLogin() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewBadRequest(errors.New("email: cannot be blank; password: cannot be blank.")),
+				err:      response.ErrBadRequest(errors.New("email: cannot be blank; password: cannot be blank.")),
 			},
 			wantErr: true,
 		},
@@ -368,7 +367,7 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleLogin() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusUnauthorized,
-				err:      response.NewWrongCredentials(errors.New("wrong password")),
+				err:      response.ErrWrongCredentials(errors.New("wrong password")),
 			},
 			wantErr: true,
 		},
@@ -389,7 +388,7 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleLogin() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusUnauthorized,
-				err:      response.NewWrongCredentials(errors.New("user not found")),
+				err:      response.ErrWrongCredentials(errors.New("user not found")),
 			},
 			wantErr: true,
 		},
@@ -404,7 +403,7 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleLogin() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusBadRequest,
-				err:      response.NewBadRequest(errors.New("unexpected EOF")),
+				err:      response.ErrBadRequest(errors.New("unexpected EOF")),
 			},
 			wantErr: true,
 		},
@@ -424,7 +423,7 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleLogin() {
 			want: want{
 				user:     domain.User{},
 				respCode: http.StatusInternalServerError,
-				err:      response.NewInternalServerError(testDBErr),
+				err:      response.ErrInternalServerError(testDBErr),
 			},
 			wantErr: true,
 		},
@@ -446,11 +445,10 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleLogin() {
 			assert.Equal(t, tt.want.respCode, resp.Code)
 
 			if tt.wantErr {
-				var result response.ErrResponse
+				var result response.Err
 				err := json.Unmarshal(resp.Body.Bytes(), &result)
 
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want.err.StatusCode, result.StatusCode)
 				assert.Equal(t, tt.want.err.ErrorMsg, result.ErrorMsg)
 				assert.Equal(t, tt.want.err.ErrorCode, result.ErrorCode)
 			} else {

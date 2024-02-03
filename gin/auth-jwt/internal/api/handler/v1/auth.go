@@ -39,19 +39,19 @@ func NewAuthHandler(conf *config.APIConfig, svc AuthService) *AuthHandler {
 // @Produce      json
 // @Param        request   body      request.SignupRequest true "request body"
 // @Success      201      {object}   domain.User
-// @Failure      400      {object}   response.ErrResponse
-// @Failure      500      {object}   response.ErrResponse
+// @Failure      400      {object}   response.Err
+// @Failure      500      {object}   response.Err
 // @Router       /auth/signup [post]
 func (h *AuthHandler) HandleSignup(ctx *gin.Context) {
 	req := request.SignupRequest{}
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.RenderError(ctx, response.NewBadRequest(err))
+		response.RenderErr(ctx, response.ErrBadRequest(err))
 
 		return
 	}
 
 	if err := req.Validate(); err != nil {
-		response.RenderError(ctx, response.NewBadRequest(err))
+		response.RenderErr(ctx, response.ErrBadRequest(err))
 
 		return
 	}
@@ -62,13 +62,13 @@ func (h *AuthHandler) HandleSignup(ctx *gin.Context) {
 	})
 	if err != nil {
 		if errors.Is(err, service.ErrUserEmailExists) {
-			response.RenderError(ctx, response.NewBadRequest(service.ErrUserEmailExists))
+			response.RenderErr(ctx, response.ErrBadRequest(service.ErrUserEmailExists))
 
 			return
 		}
 
 		err = fmt.Errorf("v1.HandleSignup -> h.svc.Signup -> %w", err)
-		response.RenderError(ctx, response.NewInternalServerError(err))
+		response.RenderErr(ctx, response.ErrInternalServerError(err))
 
 		return
 	}
@@ -82,19 +82,19 @@ func (h *AuthHandler) HandleSignup(ctx *gin.Context) {
 // @Produce      json
 // @Param        request   body      request.LoginRequest true "request body"
 // @Success      200      {object}   domain.User
-// @Failure      401      {object}   response.ErrResponse
-// @Failure      500      {object}   response.ErrResponse
+// @Failure      401      {object}   response.Err
+// @Failure      500      {object}   response.Err
 // @Router       /auth/login [post]
 func (h *AuthHandler) HandleLogin(ctx *gin.Context) {
 	req := request.LoginRequest{}
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.RenderError(ctx, response.NewBadRequest(err))
+		response.RenderErr(ctx, response.ErrBadRequest(err))
 
 		return
 	}
 
 	if err := req.Validate(); err != nil {
-		response.RenderError(ctx, response.NewBadRequest(err))
+		response.RenderErr(ctx, response.ErrBadRequest(err))
 
 		return
 	}
@@ -102,13 +102,13 @@ func (h *AuthHandler) HandleLogin(ctx *gin.Context) {
 	user, err := h.svc.Login(ctx.Request.Context(), req.Email, req.Password)
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFound) || errors.Is(err, service.ErrWrongPassword) {
-			response.RenderError(ctx, response.NewWrongCredentials(err))
+			response.RenderErr(ctx, response.ErrWrongCredentials(err))
 
 			return
 		}
 
 		err = fmt.Errorf("v1.HandleSignup -> h.svc.Login -> %w", err)
-		response.RenderError(ctx, response.NewInternalServerError(err))
+		response.RenderErr(ctx, response.ErrInternalServerError(err))
 
 		return
 	}
@@ -116,7 +116,7 @@ func (h *AuthHandler) HandleLogin(ctx *gin.Context) {
 	token, err := jwt.GenerateToken([]byte(h.conf.JWTSigningKey), user.ID, ctx.Request.UserAgent())
 	if err != nil {
 		err = fmt.Errorf("v1.HandleSignup -> middleware.GenerateToken() -> %w", err)
-		response.RenderError(ctx, response.NewInternalServerError(err))
+		response.RenderErr(ctx, response.ErrInternalServerError(err))
 
 		return
 	}
