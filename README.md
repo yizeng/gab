@@ -26,16 +26,16 @@ For example, `minimum` folder contains a minimalistic Go service with 1 example 
 `crud-gorm` contains a basic CRUD API with [GORM][go-gorm/gorm].
 
 - /chi
+    - /auth-jwt/
     - [/minimum/](./chi/minimum)
     - [/crud-gorm/](./chi/crud-gorm)
-    - /crud-gorm-auth/
     - /crud-gorm-cached/
     - /crud-sqlc/
     - ...
 - /gin
+    - [/auth-jwt](./gin/auth-jwt)
     - [/minimum/](./gin/minimum)
     - [/crud-gorm/](./gin/crud-gorm)
-    - /crud-gorm-auth/
     - /crud-gorm-cached/
     - /crud-sqlc/
     - ...
