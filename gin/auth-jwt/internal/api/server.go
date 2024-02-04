@@ -34,19 +34,9 @@ func NewServer(conf *config.AppConfig, db *gorm.DB) *Server {
 
 	authHandler := s.initAuthHandler(db)
 	userHandler := s.initUserHandler(db)
-	articleHandler := s.initArticleHandler(db)
-	s.MountHandlers(authHandler, userHandler, articleHandler)
+	s.MountHandlers(authHandler, userHandler)
 
 	return s
-}
-
-func (s *Server) initArticleHandler(db *gorm.DB) *v1.ArticleHandler {
-	articleDAO := dao.NewArticleDAO(db)
-	repo := repository.NewArticleRepository(articleDAO)
-	svc := service.NewArticleService(repo)
-	handler := v1.NewArticleHandler(svc)
-
-	return handler
 }
 
 func (s *Server) initAuthHandler(db *gorm.DB) *v1.AuthHandler {
@@ -75,7 +65,7 @@ func (s *Server) MountMiddlewares() {
 	s.Router.Use(middleware.ConfigCORS(s.Config.API.AllowedCORSDomains))
 }
 
-func (s *Server) MountHandlers(authHandler *v1.AuthHandler, userHandler *v1.UserHandler, articleHandler *v1.ArticleHandler) {
+func (s *Server) MountHandlers(authHandler *v1.AuthHandler, userHandler *v1.UserHandler) {
 	const basePath = "/api/v1"
 
 	auth := s.Router.Group(basePath)
@@ -87,14 +77,6 @@ func (s *Server) MountHandlers(authHandler *v1.AuthHandler, userHandler *v1.User
 	users := s.Router.Group(basePath, middleware.NewAuthenticator(s.Config.API.JWTSigningKey).VerifyJWT())
 	{
 		users.GET("/users/:userID", userHandler.HandleGetUser)
-	}
-
-	articles := s.Router.Group(basePath)
-	{
-		articles.GET("/articles", middleware.Paginate(), articleHandler.HandleListArticles)
-		articles.POST("/articles", articleHandler.HandleCreateArticle)
-		articles.GET("/articles/:articleID", articleHandler.HandleGetArticle)
-		articles.GET("/articles/search", articleHandler.HandleSearchArticles)
 	}
 
 	s.Router.GET("/", v1.HandleHealthcheck)
