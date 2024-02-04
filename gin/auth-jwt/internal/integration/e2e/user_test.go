@@ -3,6 +3,7 @@ package e2e
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"testing"
@@ -18,7 +19,7 @@ import (
 	"github.com/yizeng/gab/gin/auth-jwt/internal/api/handler/v1/response"
 	"github.com/yizeng/gab/gin/auth-jwt/internal/config"
 	"github.com/yizeng/gab/gin/auth-jwt/internal/domain"
-	"github.com/yizeng/gab/gin/auth-jwt/internal/pkg/jwt"
+	"github.com/yizeng/gab/gin/auth-jwt/internal/pkg/jwthelper"
 	"github.com/yizeng/gab/gin/auth-jwt/internal/repository/dao"
 	"github.com/yizeng/gab/gin/auth-jwt/pkg/dockertester"
 )
@@ -122,7 +123,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			setup: func() {},
 			args: args{
 				createHeaders: func() map[string]string {
-					token, err := jwt.GenerateToken([]byte(jwtSigningKey), 123, "")
+					token, err := jwthelper.GenerateToken([]byte(jwtSigningKey), 123, "")
 					require.NoError(s.T(), err)
 
 					return map[string]string{
@@ -233,7 +234,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			setup: func() {},
 			args: args{
 				createHeaders: func() map[string]string {
-					token, err := jwt.GenerateToken([]byte(jwtSigningKey), 123, "other user agent")
+					token, err := jwthelper.GenerateToken([]byte(jwtSigningKey), 123, "other user agent")
 					require.NoError(s.T(), err)
 
 					return map[string]string{
@@ -254,7 +255,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			setup: func() {},
 			args: args{
 				createHeaders: func() map[string]string {
-					token, err := jwt.GenerateToken([]byte(jwtSigningKey), 0, "")
+					token, err := jwthelper.GenerateToken([]byte(jwtSigningKey), 0, "")
 					require.NoError(s.T(), err)
 
 					return map[string]string{
@@ -275,7 +276,7 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			setup: func() {},
 			args: args{
 				createHeaders: func() map[string]string {
-					token, err := jwt.GenerateToken([]byte(jwtSigningKey), 123, "")
+					token, err := jwthelper.GenerateToken([]byte(jwtSigningKey), 123, "")
 					require.NoError(s.T(), err)
 
 					return map[string]string{
@@ -292,11 +293,11 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			wantErr: true,
 		},
 		{
-			name:  "400 Bad Request - Negative userID",
+			name:  "404 Not Found - Negative userID",
 			setup: func() {},
 			args: args{
 				createHeaders: func() map[string]string {
-					token, err := jwt.GenerateToken([]byte(jwtSigningKey), 123, "")
+					token, err := jwthelper.GenerateToken([]byte(jwtSigningKey), 123, "")
 					require.NoError(s.T(), err)
 
 					return map[string]string{
@@ -313,13 +314,55 @@ func (s *UserHandlerTestSuite) TestUserHandler_HandleGetUser() {
 			wantErr: true,
 		},
 		{
+			name:  "403 Forbidden- JWT UserID doesn't match userID in URL query",
+			setup: func() {},
+			args: args{
+				createHeaders: func() map[string]string {
+					token, err := jwthelper.GenerateToken([]byte(jwtSigningKey), 123, "")
+					require.NoError(s.T(), err)
+
+					return map[string]string{
+						"Authorization": "Bearer " + token,
+					}
+				},
+				userID: "456",
+			},
+			want: want{
+				user:     domain.User{},
+				respCode: http.StatusForbidden,
+				err:      response.ErrPermissionDenied(fmt.Errorf("can't view user %v by user %v", "456", "123")),
+			},
+			wantErr: true,
+		},
+		{
+			name:  "404 - User Not Found",
+			setup: func() {},
+			args: args{
+				createHeaders: func() map[string]string {
+					token, err := jwthelper.GenerateToken([]byte(jwtSigningKey), 456, "")
+					require.NoError(s.T(), err)
+
+					return map[string]string{
+						"Authorization": "Bearer " + token,
+					}
+				},
+				userID: "456",
+			},
+			want: want{
+				user:     domain.User{},
+				respCode: http.StatusNotFound,
+				err:      response.ErrNotFound("user", "ID", "456"),
+			},
+			wantErr: true,
+		},
+		{
 			name: "500 - DB error",
 			setup: func() {
 				s.createDBError()
 			},
 			args: args{
 				createHeaders: func() map[string]string {
-					token, err := jwt.GenerateToken([]byte(jwtSigningKey), 123, "")
+					token, err := jwthelper.GenerateToken([]byte(jwtSigningKey), 123, "")
 					require.NoError(s.T(), err)
 
 					return map[string]string{

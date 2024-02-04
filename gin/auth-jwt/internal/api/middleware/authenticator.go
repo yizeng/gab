@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/yizeng/gab/gin/auth-jwt/internal/api/handler/v1/response"
-	"github.com/yizeng/gab/gin/auth-jwt/internal/pkg/jwt"
+	"github.com/yizeng/gab/gin/auth-jwt/internal/pkg/jwthelper"
 )
 
 type Authenticator struct {
@@ -33,7 +33,7 @@ func (a *Authenticator) VerifyJWT() gin.HandlerFunc {
 	}
 }
 
-func (a *Authenticator) extractClaims(ctx *gin.Context) (*jwt.Claims, error) {
+func (a *Authenticator) extractClaims(ctx *gin.Context) (*jwthelper.Claims, error) {
 	authHeader := ctx.GetHeader("Authorization")
 	if authHeader == "" {
 		return nil, errors.New("header Authorization not found")
@@ -46,8 +46,8 @@ func (a *Authenticator) extractClaims(ctx *gin.Context) (*jwt.Claims, error) {
 	}
 
 	bearer := authHeader[7:]
-	claims := &jwt.Claims{} // must pass pointer into ParseWithClaims.
-	token, err := jwt.ParseWithClaims(a.JWTSigningKey, bearer, claims)
+	claims := &jwthelper.Claims{} // must pass pointer into ParseWithClaims.
+	token, err := jwthelper.ParseWithClaims(a.JWTSigningKey, bearer, claims)
 	if err != nil {
 		return nil, err
 	}

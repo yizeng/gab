@@ -11,6 +11,7 @@ import (
 
 	"github.com/yizeng/gab/gin/auth-jwt/internal/api/handler/v1/response"
 	"github.com/yizeng/gab/gin/auth-jwt/internal/domain"
+	"github.com/yizeng/gab/gin/auth-jwt/internal/pkg/jwthelper"
 	"github.com/yizeng/gab/gin/auth-jwt/internal/service"
 )
 
@@ -52,7 +53,18 @@ func (h *UserHandler) HandleGetUser(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: check JWT claim userID matches userID here.
+	claims, err := jwthelper.RetrieveClaimsFromContext(ctx)
+	if err != nil {
+		response.RenderErr(ctx, response.ErrInternalServerError(err))
+
+		return
+	}
+
+	if uint(userID) != claims.UserID {
+		response.RenderErr(ctx, response.ErrPermissionDenied(fmt.Errorf("can't view user %v by user %v", userID, claims.UserID)))
+
+		return
+	}
 
 	user, err := h.svc.GetUser(ctx.Request.Context(), uint(userID))
 	if err != nil {

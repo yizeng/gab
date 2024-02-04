@@ -1,14 +1,18 @@
-package jwt
+package jwthelper
 
 import (
+	"errors"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 var (
-	expirationTime = time.Hour
-	signingMethod  = jwt.SigningMethodHS512
+	expirationTime    = time.Hour
+	signingMethod     = jwt.SigningMethodHS512
+	errClaimsNotFound = errors.New("claims not found in the context")
+	errClaimsNotValid = errors.New("claims not valid")
 )
 
 type Claims struct {
@@ -40,4 +44,18 @@ func ParseWithClaims(signingKey, tokenString string, claims *Claims) (*jwt.Token
 	return jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(signingKey), nil
 	})
+}
+
+func RetrieveClaimsFromContext(ctx *gin.Context) (*Claims, error) {
+	val, exists := ctx.Get("claims")
+	if !exists {
+		return nil, errClaimsNotFound
+	}
+
+	claims, ok := val.(*Claims)
+	if !ok {
+		return nil, errClaimsNotValid
+	}
+
+	return claims, nil
 }

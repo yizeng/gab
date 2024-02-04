@@ -12,7 +12,7 @@ import (
 	"github.com/yizeng/gab/gin/auth-jwt/internal/api/handler/v1/response"
 	"github.com/yizeng/gab/gin/auth-jwt/internal/config"
 	"github.com/yizeng/gab/gin/auth-jwt/internal/domain"
-	"github.com/yizeng/gab/gin/auth-jwt/internal/pkg/jwt"
+	"github.com/yizeng/gab/gin/auth-jwt/internal/pkg/jwthelper"
 	"github.com/yizeng/gab/gin/auth-jwt/internal/service"
 )
 
@@ -113,7 +113,7 @@ func (h *AuthHandler) HandleLogin(ctx *gin.Context) {
 		return
 	}
 
-	token, err := jwt.GenerateToken([]byte(h.conf.JWTSigningKey), user.ID, ctx.Request.UserAgent())
+	token, err := jwthelper.GenerateToken([]byte(h.conf.JWTSigningKey), user.ID, ctx.Request.UserAgent())
 	if err != nil {
 		err = fmt.Errorf("v1.HandleSignup -> middleware.GenerateToken() -> %w", err)
 		response.RenderErr(ctx, response.ErrInternalServerError(err))

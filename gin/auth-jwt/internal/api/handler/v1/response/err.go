@@ -79,3 +79,13 @@ func ErrJWTUnverified(err error) *Err {
 		ErrorMsg: "please log in",
 	}
 }
+
+func ErrPermissionDenied(err error) *Err {
+	return &Err{
+		statusCode: http.StatusForbidden,
+		logFunc: func() {
+			zap.L().Debug("permission denied: " + err.Error())
+		},
+		ErrorMsg: "permission denied",
+	}
+}
