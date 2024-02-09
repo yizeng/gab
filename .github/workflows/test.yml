@@ -11,6 +11,20 @@ on:
 
 jobs:
 
+  chi-gorm-auth-jwt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run tests with coverage
+        uses: "./.github/actions/test"
+        with:
+          working_directory: "chi/gorm/auth-jwt"
+          artifact_name: "chi-gorm-auth-jwt"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+
   chi-crud-gorm:
     runs-on: ubuntu-latest
     steps:
@@ -39,20 +53,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
-  gin-crud-gorm:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Run tests with coverage
-        uses: "./.github/actions/test"
-        with:
-          working_directory: "gin/crud-gorm"
-          artifact_name: "gin-crud-gorm"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          codecov_token: ${{ secrets.CODECOV_TOKEN }}
-
   gin-auth-jwt:
     runs-on: ubuntu-latest
     steps:
@@ -64,6 +64,20 @@ jobs:
         with:
           working_directory: "gin/auth-jwt"
           artifact_name: "gin-auth-jwt"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+
+  gin-crud-gorm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run tests with coverage
+        uses: "./.github/actions/test"
+        with:
+          working_directory: "gin/crud-gorm"
+          artifact_name: "gin-crud-gorm"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
