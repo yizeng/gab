@@ -25,7 +25,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
-  chi-crud-gorm:
+  chi-gorm-crud:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -34,8 +34,8 @@ jobs:
       - name: Run tests with coverage
         uses: "./.github/actions/test"
         with:
-          working_directory: "chi/crud-gorm"
-          artifact_name: "chi-crud-gorm"
+          working_directory: "chi/gorm/crud"
+          artifact_name: "chi-gorm-crud"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
