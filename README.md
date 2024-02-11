@@ -35,11 +35,13 @@ For example, `minimum` folder contains a minimalistic Go service with 1 example 
   - /sqlc
     - ...
 - /gin
-    - [/auth-jwt](./gin/auth-jwt)
-    - [/minimum/](./gin/minimum)
-    - [/crud-gorm/](./gin/crud-gorm)
-    - /crud-gorm-cached/
-    - /crud-sqlc/
+  - [/minimum](./gin/minimum)
+  - [/gorm](./gin/gorm)
+    - [/auth-jwt](./gin/gorm/auth-jwt)
+    - [/crud](./gin/gorm/crud)
+    - [/wip-complete](./gin/gorm/wip-complete) (trying to have everything, but work in progress)
+    - /crud-cached
+  - /sqlc
     - ...
 - ...
 

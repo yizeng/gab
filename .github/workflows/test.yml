@@ -67,7 +67,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
-  gin-auth-jwt:
+  gin-gorm-auth-jwt:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -76,12 +76,12 @@ jobs:
       - name: Run tests with coverage
         uses: "./.github/actions/test"
         with:
-          working_directory: "gin/auth-jwt"
-          artifact_name: "gin-auth-jwt"
+          working_directory: "gin/gorm/auth-jwt"
+          artifact_name: "gin-gorm-auth-jwt"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
-  gin-crud-gorm:
+  gin-gorm-crud:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -90,8 +90,8 @@ jobs:
       - name: Run tests with coverage
         uses: "./.github/actions/test"
         with:
-          working_directory: "gin/crud-gorm"
-          artifact_name: "gin-crud-gorm"
+          working_directory: "gin/gorm/crud"
+          artifact_name: "gin-gorm-crud"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
