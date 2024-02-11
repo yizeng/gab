@@ -39,6 +39,20 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
+  chi-gorm-wip-complete:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run tests with coverage
+        uses: "./.github/actions/test"
+        with:
+          working_directory: "chi/gorm/wip-complete"
+          artifact_name: "chi-gorm-wip-complete"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+
   chi-minimum:
     runs-on: ubuntu-latest
     steps:
