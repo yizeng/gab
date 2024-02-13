@@ -70,11 +70,7 @@ func (h *ArticleHandler) HandleCreateArticle(w http.ResponseWriter, r *http.Requ
 	}
 
 	render.Status(r, http.StatusCreated)
-	if err = render.Render(w, r, response.NewArticle(&article)); err != nil {
-		_ = render.Render(w, r, response.ErrInternalServerError(err))
-
-		return
-	}
+	render.JSON(w, r, article)
 }
 
 // HandleGetArticle godoc
@@ -116,11 +112,8 @@ func (h *ArticleHandler) HandleGetArticle(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err = render.Render(w, r, response.NewArticle(&article)); err != nil {
-		_ = render.Render(w, r, response.ErrInternalServerError(err))
-
-		return
-	}
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, article)
 }
 
 // HandleListArticles godoc
@@ -158,11 +151,8 @@ func (h *ArticleHandler) HandleListArticles(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if err = render.RenderList(w, r, response.NewArticles(articles)); err != nil {
-		_ = render.Render(w, r, response.ErrInternalServerError(err))
-
-		return
-	}
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, articles)
 }
 
 // HandleSearchArticles godoc
@@ -186,9 +176,6 @@ func (h *ArticleHandler) HandleSearchArticles(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if err = render.RenderList(w, r, response.NewArticles(articles)); err != nil {
-		_ = render.Render(w, r, response.ErrInternalServerError(err))
-
-		return
-	}
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, articles)
 }

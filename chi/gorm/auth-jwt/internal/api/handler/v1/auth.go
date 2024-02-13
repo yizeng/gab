@@ -68,11 +68,7 @@ func (h *AuthHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.Status(r, http.StatusCreated)
-	if err = render.Render(w, r, response.NewUser(&user)); err != nil {
-		_ = render.Render(w, r, response.ErrInternalServerError(err))
-
-		return
-	}
+	render.JSON(w, r, user)
 }
 
 // HandleLogin godoc
