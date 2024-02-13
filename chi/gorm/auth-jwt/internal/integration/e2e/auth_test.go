@@ -33,6 +33,7 @@ var (
 		Email:    "123@test.com",
 		Password: "hello@123",
 	}
+	testDBErr = errors.New("DB error")
 )
 
 type AuthHandlerTestSuite struct {

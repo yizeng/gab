@@ -36,8 +36,7 @@ func NewServer(conf *config.AppConfig, db *gorm.DB) *Server {
 
 	authHandler := s.initAuthHandler(db)
 	userHandler := s.initUserHandler(db)
-	articleHandler := s.initArticleHandler(db)
-	s.MountHandlers(authHandler, userHandler, articleHandler)
+	s.MountHandlers(authHandler, userHandler)
 
 	return s
 }
@@ -53,7 +52,7 @@ func (s *Server) MountMiddlewares() {
 	s.Router.Use(render.SetContentType(render.ContentTypeJSON))
 }
 
-func (s *Server) MountHandlers(authHandler *v1.AuthHandler, userHandler *v1.UserHandler, articleHandler *v1.ArticleHandler) {
+func (s *Server) MountHandlers(authHandler *v1.AuthHandler, userHandler *v1.UserHandler) {
 	const basePath = "/api/v1"
 
 	apiV1Router := chi.NewRouter()
@@ -69,13 +68,6 @@ func (s *Server) MountHandlers(authHandler *v1.AuthHandler, userHandler *v1.User
 
 			r.Get("/users/{userID}", userHandler.HandleGetUser)
 		})
-
-		r.Group(func(r chi.Router) {
-			r.With(middleware.Pagination).Get("/articles", articleHandler.HandleListArticles)
-			r.Post("/articles", articleHandler.HandleCreateArticle)
-			r.Get("/articles/{articleID}", articleHandler.HandleGetArticle)
-			r.Get("/articles/search", articleHandler.HandleSearchArticles)
-		})
 	})
 
 	s.Router.Mount(basePath, apiV1Router)
@@ -89,15 +81,6 @@ func (s *Server) MountHandlers(authHandler *v1.AuthHandler, userHandler *v1.User
 	s.Router.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	s.printAllRoutes()
-}
-
-func (s *Server) initArticleHandler(db *gorm.DB) *v1.ArticleHandler {
-	articleDAO := dao.NewArticleDAO(db)
-	articleRepo := repository.NewArticleRepository(articleDAO)
-	articleSvc := service.NewArticleService(articleRepo)
-	articleHandler := v1.NewArticleHandler(articleSvc)
-
-	return articleHandler
 }
 
 func (s *Server) initAuthHandler(db *gorm.DB) *v1.AuthHandler {
