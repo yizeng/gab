@@ -56,7 +56,7 @@ Alternatively, use `make install` to install the required Go tooling locally.
 
 This service has integrated [swaggo/swag][swaggo/swag] to create OpenAPI documentation automatically.
 
-Use command `make swagg` or `swag init` to run the generation.
+Use command `make generate/api` or `swag init` to run the generation.
 
 Then navigate to <http://localhost:3333/swagger/index.html> to view the API documentation.
 
