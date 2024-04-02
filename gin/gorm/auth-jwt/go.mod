@@ -9,7 +9,7 @@ require (
 	github.com/gin-contrib/requestid v0.0.6
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
-	github.com/golang-jwt/jwt/v5 v5.2.0
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
 	github.com/jackc/pgx/v5 v5.4.3
 	github.com/joho/godotenv v1.5.1
