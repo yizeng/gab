@@ -207,7 +207,11 @@ func (s *AuthHandlerTestSuite) TestAuthHandler_HandleSignup() {
 			setup: func() {},
 			args: args{
 				buildReqBody: func() string {
-					body, err := json.Marshal(testSignupReq)
+					body, err := json.Marshal(request.SignupRequest{
+						Email:           "123@test.com",
+						Password:        "Test!123",
+						ConfirmPassword: "Test!123",
+					})
 					require.NoError(s.T(), err)
 
 					return string(body)

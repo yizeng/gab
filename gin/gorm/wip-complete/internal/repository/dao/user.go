@@ -43,7 +43,7 @@ func (d *UserDAO) Insert(ctx context.Context, user User) (User, error) {
 		var err *pgconn.PgError
 		if errors.As(result.Error, &err) &&
 			err.Code == pgerrcode.UniqueViolation &&
-			strings.Contains(err.Message, `unique constraint "users_email_key"`) {
+			strings.Contains(err.Message, `unique constraint "uni_users_email"`) {
 			return User{}, ErrUserEmailExists
 		}
 
