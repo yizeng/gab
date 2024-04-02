@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/dchest/uniuri v1.2.0
-	github.com/dlclark/regexp2 v1.10.0
+	github.com/dlclark/regexp2 v1.11.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-chi/cors v1.2.1
