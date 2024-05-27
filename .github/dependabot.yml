@@ -9,41 +9,111 @@ updates:
     directory: "/chi/gorm/auth-jwt"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    commit-message:
+      prefix: "build(deps)"
+    assignees:
+      - "yizeng"
   - package-ecosystem: "gomod"
     directory: "/chi/gorm/crud"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    commit-message:
+      prefix: "build(deps)"
+    assignees:
+      - "yizeng"
   - package-ecosystem: "gomod"
     directory: "/chi/gorm/wip-complete"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    commit-message:
+      prefix: "build(deps)"
+    assignees:
+      - "yizeng"
   - package-ecosystem: "gomod"
     directory: "/chi/minimum"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    commit-message:
+      prefix: "build(deps)"
+    assignees:
+      - "yizeng"
   - package-ecosystem: "gomod"
     directory: "/gin/gorm/auth-jwt"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    commit-message:
+      prefix: "build(deps)"
+    assignees:
+      - "yizeng"
   - package-ecosystem: "gomod"
     directory: "/gin/gorm/crud"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    commit-message:
+      prefix: "build(deps)"
+    assignees:
+      - "yizeng"
   - package-ecosystem: "gomod"
     directory: "/gin/gorm/wip-complete"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    commit-message:
+      prefix: "build(deps)"
+    assignees:
+      - "yizeng"
   - package-ecosystem: "gomod"
     directory: "/gin/minimum"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    commit-message:
+      prefix: "build(deps)"
+    assignees:
+      - "yizeng"
 
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    commit-message:
+      prefix: "build(deps)"
+    assignees:
+      - "yizeng"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    commit-message:
+      prefix: "build(deps)"
+    assignees:
+      - "yizeng"
